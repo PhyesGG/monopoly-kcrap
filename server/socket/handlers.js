@@ -1,0 +1,117 @@
+const { createLobby, joinLobby, leaveLobby, listLobbies } = require('./lobby');
+const { 
+  startGame, 
+  rollDice, 
+  placeBid,
+  passBid,
+  activateRevenge,
+  declineRevenge,
+  createAlliance,
+  breakAlliance,
+  applyCardEffect
+} = require('./gameEvents');
+
+function initSocketHandlers(io) {
+  // Espace de noms pour les jeux
+  const gameNamespace = io.of('/game');
+  
+  console.log('Initialisation des gestionnaires de socket pour le namespace /game');
+  
+  gameNamespace.on('connection', (socket) => {
+    console.log(`Nouvelle connexion socket: ${socket.id}`);
+    
+    // Événements de lobby
+    socket.on('create_lobby', (data, callback) => {
+      console.log('Événement create_lobby reçu:', data);
+      const result = createLobby(socket, data);
+      if (callback) {
+        console.log('Envoi de la réponse create_lobby:', result);
+        callback(result);
+      }
+    });
+    
+    socket.on('join_lobby', (data, callback) => {
+      console.log('Événement join_lobby reçu:', data);
+      const result = joinLobby(socket, data);
+      if (callback) {
+        console.log('Envoi de la réponse join_lobby:', result);
+        callback(result);
+      }
+    });
+    
+    socket.on('leave_lobby', (data, callback) => {
+      console.log('Événement leave_lobby reçu:', data);
+      const result = leaveLobby(socket, data);
+      if (callback) {
+        console.log('Envoi de la réponse leave_lobby:', result);
+        callback(result);
+      }
+    });
+    
+    socket.on('list_lobbies', (callback) => {
+      console.log('Événement list_lobbies reçu');
+      const result = listLobbies();
+      if (callback) {
+        console.log('Envoi de la réponse list_lobbies:', result);
+        callback(result);
+      }
+    });
+    
+    // Événements de jeu
+    socket.on('start_game', (data, callback) => {
+      console.log('Événement start_game reçu:', data);
+      const result = startGame(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('roll_dice', (data, callback) => {
+      const result = rollDice(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('place_bid', (data, callback) => {
+      const result = placeBid(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('pass_bid', (data, callback) => {
+      const result = passBid(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('activate_revenge', (data, callback) => {
+      const result = activateRevenge(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('decline_revenge', (data, callback) => {
+      const result = declineRevenge(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('create_alliance', (data, callback) => {
+      const result = createAlliance(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('break_alliance', (data, callback) => {
+      const result = breakAlliance(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    socket.on('apply_card_effect', (data, callback) => {
+      const result = applyCardEffect(io, socket, data);
+      if (callback) callback(result);
+    });
+    
+    // Déconnexion
+    socket.on('disconnect', () => {
+      console.log(`Déconnexion socket: ${socket.id}`);
+      leaveLobby(socket);
+    });
+  });
+  
+  return gameNamespace;
+}
+
+module.exports = { initSocketHandlers };

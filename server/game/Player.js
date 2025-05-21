@@ -10,6 +10,9 @@ class Player {
     this.properties = [];
     this.inJail = false;
     this.jailTurns = 0;
+    this.turnsInJail = 0; // Nombre de tours déjà passés en prison
+    this.totalJailPayments = 0; // Somme payée pour sortir de prison
+    this.jailCards = 0; // Cartes "Sortie de prison"
     this.bankrupt = false;
     
     // Spécifique au mode KCRAP
@@ -75,6 +78,26 @@ class Player {
 
   canAfford(amount) {
     return this.money >= amount;
+  }
+
+  goToJail() {
+    this.inJail = true;
+    this.jailTurns = 3;
+    this.turnsInJail = 0;
+  }
+
+  releaseFromJail() {
+    this.inJail = false;
+    this.jailTurns = 0;
+    this.turnsInJail = 0;
+  }
+
+  payJailFine(amount = 50) {
+    if (this.money < amount) return false;
+    this.money -= amount;
+    this.totalJailPayments += amount;
+    this.releaseFromJail();
+    return true;
   }
 
   // Méthode pour activer le mécanisme de "Revanche"

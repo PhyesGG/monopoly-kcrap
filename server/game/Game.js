@@ -332,7 +332,10 @@ class Game {
     this.state = 'rolling';
     
     // Si c'était le joueur actuel qui a atterri sur la case, passer au joueur suivant
-    if (this.board.getSquareAt(this.currentPlayer.position) === result.property) {
+    if (
+      this.currentPlayer &&
+      this.board.getSquareAt(this.currentPlayer.position) === result.property
+    ) {
       this.nextPlayer();
     }
     

@@ -418,7 +418,119 @@ class Game {
       return !((alliance.player1.id === player.id && alliance.player2.id === ally.id) ||
                (alliance.player1.id === ally.id && alliance.player2.id === player.id));
     });
-    
+
+    return { success: true };
+  }
+
+  buyHouse(playerId, propertyId) {
+    const player = this.players[playerId];
+
+    if (!player) {
+      return { success: false, message: "Joueur non trouvé." };
+    }
+
+    const property = player.properties.find(p => p.id === propertyId);
+
+    if (!property) {
+      return { success: false, message: "Propriété non trouvée." };
+    }
+
+    const cost = Math.floor(property.price * 0.5);
+
+    if (!player.canAfford(cost)) {
+      return { success: false, message: "Fonds insuffisants." };
+    }
+
+    if (!property.buyHouse()) {
+      return { success: false, message: "Achat de maison impossible." };
+    }
+
+    player.money -= cost;
+    this.log.push(`${player.name} a construit une maison sur ${property.name} pour ${cost}€`);
+
+    return { success: true, houses: property.houses };
+  }
+
+  buyHotel(playerId, propertyId) {
+    const player = this.players[playerId];
+
+    if (!player) {
+      return { success: false, message: "Joueur non trouvé." };
+    }
+
+    const property = player.properties.find(p => p.id === propertyId);
+
+    if (!property) {
+      return { success: false, message: "Propriété non trouvée." };
+    }
+
+    const cost = property.price;
+
+    if (!player.canAfford(cost)) {
+      return { success: false, message: "Fonds insuffisants." };
+    }
+
+    if (!property.buyHotel()) {
+      return { success: false, message: "Achat d'hôtel impossible." };
+    }
+
+    player.money -= cost;
+    this.log.push(`${player.name} a construit un hôtel sur ${property.name} pour ${cost}€`);
+
+    return { success: true };
+  }
+
+  mortgageProperty(playerId, propertyId) {
+    const player = this.players[playerId];
+
+    if (!player) {
+      return { success: false, message: "Joueur non trouvé." };
+    }
+
+    const property = player.properties.find(p => p.id === propertyId);
+
+    if (!property) {
+      return { success: false, message: "Propriété non trouvée." };
+    }
+
+    const value = Math.floor(property.price * 0.5);
+
+    if (!property.mortgage()) {
+      return { success: false, message: "Hypothèque impossible." };
+    }
+
+    player.money += value;
+    this.log.push(`${player.name} hypothèque ${property.name} et reçoit ${value}€`);
+
+    return { success: true, amount: value };
+  }
+
+  unmortgageProperty(playerId, propertyId) {
+    const player = this.players[playerId];
+
+    if (!player) {
+      return { success: false, message: "Joueur non trouvé." };
+    }
+
+    const property = player.properties.find(p => p.id === propertyId);
+
+    if (!property) {
+      return { success: false, message: "Propriété non trouvée." };
+    }
+
+    const cost = Math.floor(property.price * 0.55);
+
+    if (player.money < cost) {
+      return { success: false, message: "Fonds insuffisants." };
+    }
+
+    if (!property.unmortgage()) {
+      return { success: false, message: "Action impossible." };
+    }
+
+    player.money -= cost;
+    this.log.push(`${player.name} lève l'hypothèque sur ${property.name} pour ${cost}€`);
+
     return { success: true };
   }
 

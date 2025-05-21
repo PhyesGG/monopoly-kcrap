@@ -106,6 +106,26 @@ export function initSocket(url = window.location.origin) {
     setCardState({ applied: true, playerId, cardId, success, message });
     updateGameState(gameState);
   });
+
+  socket.on('house_bought', ({ playerId, propertyId, success, message, gameState }) => {
+    console.log('Maison achetée:', playerId, propertyId, success, message);
+    updateGameState(gameState);
+  });
+
+  socket.on('hotel_bought', ({ playerId, propertyId, success, message, gameState }) => {
+    console.log("Hôtel acheté:", playerId, propertyId, success, message);
+    updateGameState(gameState);
+  });
+
+  socket.on('property_mortgaged', ({ playerId, propertyId, success, message, gameState }) => {
+    console.log('Propriété hypothéquée:', playerId, propertyId, success, message);
+    updateGameState(gameState);
+  });
+
+  socket.on('property_unmortgaged', ({ playerId, propertyId, success, message, gameState }) => {
+    console.log("Hypothèque levée:", playerId, propertyId, success, message);
+    updateGameState(gameState);
+  });
   
   socket.on('disconnect', () => {
     console.log('Déconnecté du serveur');
@@ -366,6 +386,74 @@ export function applyCardEffect(cardId, params) {
     }
     
     socket.emit('apply_card_effect', { cardId, params }, (response) => {
+      if (response && response.success) {
+        resolve(response);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
+export function buyHouse(propertyId) {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('buy_house', { propertyId }, (response) => {
+      if (response && response.success) {
+        resolve(response);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
+export function buyHotel(propertyId) {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('buy_hotel', { propertyId }, (response) => {
+      if (response && response.success) {
+        resolve(response);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
+export function mortgageProperty(propertyId) {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('mortgage_property', { propertyId }, (response) => {
+      if (response && response.success) {
+        resolve(response);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
+export function unmortgageProperty(propertyId) {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('unmortgage_property', { propertyId }, (response) => {
       if (response && response.success) {
         resolve(response);
       } else {

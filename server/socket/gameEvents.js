@@ -417,6 +417,142 @@ function applyCardEffect(io, socket, { cardId, params }) {
   return result;
 }
 
+function buyHouse(io, socket, { propertyId }) {
+  if (typeof propertyId !== 'number') {
+    return { success: false, message: 'Propriété invalide' };
+  }
+
+  const lobby = getLobbyBySocketId(socket.id);
+
+  if (!lobby || !lobby.game) {
+    return { success: false, message: 'Partie non trouvée' };
+  }
+
+  const game = lobby.game;
+
+  const playerId = Object.keys(game.players).find(
+    id => game.players[id].socketId === socket.id
+  );
+
+  if (!playerId) {
+    return { success: false, message: 'Joueur non trouvé' };
+  }
+
+  const result = game.buyHouse(playerId, propertyId);
+
+  io.of('/game').to(lobby.id).emit('house_bought', {
+    playerId,
+    propertyId,
+    success: result.success,
+    message: result.message,
+    gameState: game.getGameState()
+  });
+
+  return result;
+}
+
+function buyHotel(io, socket, { propertyId }) {
+  if (typeof propertyId !== 'number') {
+    return { success: false, message: 'Propriété invalide' };
+  }
+
+  const lobby = getLobbyBySocketId(socket.id);
+
+  if (!lobby || !lobby.game) {
+    return { success: false, message: 'Partie non trouvée' };
+  }
+
+  const game = lobby.game;
+
+  const playerId = Object.keys(game.players).find(
+    id => game.players[id].socketId === socket.id
+  );
+
+  if (!playerId) {
+    return { success: false, message: 'Joueur non trouvé' };
+  }
+
+  const result = game.buyHotel(playerId, propertyId);
+
+  io.of('/game').to(lobby.id).emit('hotel_bought', {
+    playerId,
+    propertyId,
+    success: result.success,
+    message: result.message,
+    gameState: game.getGameState()
+  });
+
+  return result;
+}
+
+function mortgageProperty(io, socket, { propertyId }) {
+  if (typeof propertyId !== 'number') {
+    return { success: false, message: 'Propriété invalide' };
+  }
+
+  const lobby = getLobbyBySocketId(socket.id);
+
+  if (!lobby || !lobby.game) {
+    return { success: false, message: 'Partie non trouvée' };
+  }
+
+  const game = lobby.game;
+
+  const playerId = Object.keys(game.players).find(
+    id => game.players[id].socketId === socket.id
+  );
+
+  if (!playerId) {
+    return { success: false, message: 'Joueur non trouvé' };
+  }
+
+  const result = game.mortgageProperty(playerId, propertyId);
+
+  io.of('/game').to(lobby.id).emit('property_mortgaged', {
+    playerId,
+    propertyId,
+    success: result.success,
+    message: result.message,
+    gameState: game.getGameState()
+  });
+
+  return result;
+}
+
+function unmortgageProperty(io, socket, { propertyId }) {
+  if (typeof propertyId !== 'number') {
+    return { success: false, message: 'Propriété invalide' };
+  }
+
+  const lobby = getLobbyBySocketId(socket.id);
+
+  if (!lobby || !lobby.game) {
+    return { success: false, message: 'Partie non trouvée' };
+  }
+
+  const game = lobby.game;
+
+  const playerId = Object.keys(game.players).find(
+    id => game.players[id].socketId === socket.id
+  );
+
+  if (!playerId) {
+    return { success: false, message: 'Joueur non trouvé' };
+  }
+
+  const result = game.unmortgageProperty(playerId, propertyId);
+
+  io.of('/game').to(lobby.id).emit('property_unmortgaged', {
+    playerId,
+    propertyId,
+    success: result.success,
+    message: result.message,
+    gameState: game.getGameState()
+  });
+
+  return result;
+}
+
 module.exports = {
   startGame,
   rollDice,
@@ -426,5 +562,9 @@ module.exports = {
   declineRevenge,
   createAlliance,
   breakAlliance,
-  applyCardEffect
+  applyCardEffect,
+  buyHouse,
+  buyHotel,
+  mortgageProperty,
+  unmortgageProperty
 };

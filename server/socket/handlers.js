@@ -8,7 +8,11 @@ const {
   declineRevenge,
   createAlliance,
   breakAlliance,
-  applyCardEffect
+  applyCardEffect,
+  buyHouse,
+  buyHotel,
+  mortgageProperty,
+  unmortgageProperty
 } = require('./gameEvents');
 
 function initSocketHandlers(io) {
@@ -107,6 +111,26 @@ function initSocketHandlers(io) {
     
     socket.on('apply_card_effect', (data, callback) => {
       const result = applyCardEffect(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('buy_house', (data, callback) => {
+      const result = buyHouse(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('buy_hotel', (data, callback) => {
+      const result = buyHotel(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('mortgage_property', (data, callback) => {
+      const result = mortgageProperty(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('unmortgage_property', (data, callback) => {
+      const result = unmortgageProperty(io, socket, data);
       if (callback) callback(result);
     });
     

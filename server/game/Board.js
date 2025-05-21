@@ -17,7 +17,10 @@ class Board {
     });
     
     // Propriétés marron
-    squares.push(new Property(1, 'Boulevard de Belleville', 60, 'brown', 1));
+    const p1 = new Property(1, 'Boulevard de Belleville', 60, 'brown');
+    p1.type = 'property';
+    p1.position = 1;
+    squares.push(p1);
     
     squares.push({
       id: 2,
@@ -26,7 +29,10 @@ class Board {
       position: 2
     });
     
-    squares.push(new Property(3, 'Rue Lecourbe', 60, 'brown', 3));
+    const p2 = new Property(3, 'Rue Lecourbe', 60, 'brown');
+    p2.type = 'property';
+    p2.position = 3;
+    squares.push(p2);
     
     squares.push({
       id: 4,
@@ -37,9 +43,15 @@ class Board {
     });
     
     // Propriétés bleu clair
-    squares.push(new Property(5, 'Rue de Vaugirard', 100, 'light-blue', 5));
+    const p3 = new Property(5, 'Rue de Vaugirard', 100, 'light-blue');
+    p3.type = 'property';
+    p3.position = 5;
+    squares.push(p3);
     
-    squares.push(new Property(6, 'Rue de Courcelles', 100, 'light-blue', 6));
+    const p4 = new Property(6, 'Rue de Courcelles', 100, 'light-blue');
+    p4.type = 'property';
+    p4.position = 6;
+    squares.push(p4);
     
     squares.push({
       id: 7,
@@ -48,7 +60,10 @@ class Board {
       position: 7
     });
     
-    squares.push(new Property(8, 'Avenue de la République', 120, 'light-blue', 8));
+    const p5 = new Property(8, 'Avenue de la République', 120, 'light-blue');
+    p5.type = 'property';
+    p5.position = 8;
+    squares.push(p5);
     
     // Prison - Visite
     squares.push({
@@ -61,9 +76,15 @@ class Board {
     // Note: pour un jeu complet, il faudrait ajouter les 40 cases
     // J'ajoute seulement quelques cases de plus pour l'exemple
     
-    squares.push(new Property(10, 'Boulevard de la Villette', 140, 'pink', 10));
+    const p6 = new Property(10, 'Boulevard de la Villette', 140, 'pink');
+    p6.type = 'property';
+    p6.position = 10;
+    squares.push(p6);
     
-    squares.push(new Property(11, 'Avenue de Neuilly', 140, 'pink', 11));
+    const p7 = new Property(11, 'Avenue de Neuilly', 140, 'pink');
+    p7.type = 'property';
+    p7.position = 11;
+    squares.push(p7);
     
     squares.push({
       id: 12,
@@ -89,7 +110,3 @@ class Board {
       }
       return cleanSquare;
     });
-  }
-}
-
-module.exports = Board;

@@ -15,11 +15,12 @@ export function initSocket(url = window.location.origin) {
   if (socket) {
     socket.disconnect();
   }
-  
+
   // Correction de la connexion socket.io
-  socket = io(`${url}`, { path: '/socket.io' });
-  
-  console.log('Tentative de connexion socket.io à:', url);
+  // Se connecter explicitement au namespace "/game" utilisé par le serveur
+  socket = io(`${url}/game`, { path: '/socket.io' });
+
+  console.log('Tentative de connexion socket.io au namespace /game à:', `${url}`);
   
   // Écouter l'événement de connexion
   socket.on('connect', () => {

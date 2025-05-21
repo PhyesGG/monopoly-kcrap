@@ -1,4 +1,23 @@
-import { initSocket, getSocket, createLobby, joinLobby, listLobbies, startGame, rollDice, placeBid, passBid, activateRevenge, declineRevenge, createAlliance, breakAlliance, applyCardEffect } from './socket';
+import {
+  initSocket,
+  getSocket,
+  createLobby,
+  joinLobby,
+  listLobbies,
+  startGame,
+  rollDice,
+  placeBid,
+  passBid,
+  activateRevenge,
+  declineRevenge,
+  createAlliance,
+  breakAlliance,
+  applyCardEffect,
+  buyHouse,
+  buyHotel,
+  mortgageProperty,
+  unmortgageProperty
+} from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
 
@@ -586,7 +605,26 @@ function renderPlayersInfo(players) {
     const playerElement = document.createElement('div');
     playerElement.className = `player-card ${player.bankrupt ? 'bankrupt' : ''}`;
     playerElement.dataset.id = player.id;
-    
+
+    const socket = getSocket();
+    const isSelf = socket && socket.id === player.socketId;
+
+    let propertiesHtml = '';
+    if (isSelf && player.properties.length > 0) {
+      propertiesHtml = '<ul class="property-actions">';
+      player.properties.forEach(prop => {
+        propertiesHtml += `
+          <li>
+            <span class="prop-name">${prop.name}</span>
+            <button class="buy-house-btn" data-id="${prop.id}">+Maison</button>
+            <button class="buy-hotel-btn" data-id="${prop.id}">+Hôtel</button>
+            <button class="mortgage-btn" data-id="${prop.id}">Hyp.</button>
+            <button class="unmortgage-btn" data-id="${prop.id}">Lever</button>
+          </li>`;
+      });
+      propertiesHtml += '</ul>';
+    }
+
     playerElement.innerHTML = `
       <div class="player-header">
         <div class="player-name">${player.name}</div>
@@ -601,9 +639,27 @@ function renderPlayersInfo(players) {
         ${player.revengeActive ? '<div class="revenge-active"><i class="fas fa-exclamation-triangle"></i> Prêt actif</div>' : ''}
         ${player.currentAlliance ? '<div class="alliance"><i class="fas fa-handshake"></i> En alliance</div>' : ''}
       </div>
+      ${propertiesHtml}
     `;
-    
+
     playersInfo.appendChild(playerElement);
+  });
+
+  // Ajouter les gestionnaires sur les boutons des propriétés
+  document.querySelectorAll('.buy-house-btn').forEach(btn => {
+    btn.addEventListener('click', () => buyHouse(parseInt(btn.dataset.id)));
+  });
+
+  document.querySelectorAll('.buy-hotel-btn').forEach(btn => {
+    btn.addEventListener('click', () => buyHotel(parseInt(btn.dataset.id)));
+  });
+
+  document.querySelectorAll('.mortgage-btn').forEach(btn => {
+    btn.addEventListener('click', () => mortgageProperty(parseInt(btn.dataset.id)));
+  });
+
+  document.querySelectorAll('.unmortgage-btn').forEach(btn => {
+    btn.addEventListener('click', () => unmortgageProperty(parseInt(btn.dataset.id)));
   });
 }
 

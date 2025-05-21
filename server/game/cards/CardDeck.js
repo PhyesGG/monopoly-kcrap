@@ -58,6 +58,16 @@ class CardDeck {
         'Tous les joueurs doivent payer 10% de taxe sur tous les loyers perçus pendant 2 tours'
       ));
     }
+
+    // Cartes Aller en prison
+    for (let i = 0; i < 2; i++) {
+      this.cards.push(new KcrapCard(
+        `jail_${i}`,
+        'jail',
+        'Aller en prison',
+        'Allez directement en prison et ne passez pas par la case départ'
+      ));
+    }
     
     // Mélanger les cartes
     this.shuffle();

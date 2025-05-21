@@ -6,6 +6,8 @@ const Alliance = require('./Alliance');
 const Board = require('./Board');
 const CardDeck = require('./cards/CardDeck');
 
+const JAIL_FINE = 50;
+
 class Game {
   constructor() {
     this.id = uuid.v4();
@@ -75,132 +77,148 @@ class Game {
     };
   }
 
-  rollDice() {
-    if (this.state !== 'rolling') {
-      return { success: false, message: "Ce n'est pas le moment de lancer les dés." };
-    }
-    
-    const dice1 = Math.floor(Math.random() * 6) + 1;
-    const dice2 = Math.floor(Math.random() * 6) + 1;
-    const total = dice1 + dice2;
-    const doubles = dice1 === dice2;
-    
-    // Déplacer le joueur
-    const moveResult = this.currentPlayer.move(total);
-    
-    this.log.push(`${this.currentPlayer.name} a lancé les dés: ${dice1} et ${dice2} = ${total}`);
-    
-    // Gérer la case actuelle
+  sendPlayerToJail(player) {
+    player.position = 9;
+    player.goToJail();
+  }
+
+  processSquare() {
     const currentSquare = this.board.getSquareAt(this.currentPlayer.position);
-    
     let actionResult = null;
-    
+
     if (currentSquare.type === 'property') {
       if (!currentSquare.owner) {
-        // Propriété libre, démarrer une enchère (mode KCRAP)
         this.startAuction(currentSquare);
         this.state = 'auction';
-        
-        actionResult = {
-          type: 'auction',
-          property: currentSquare
-        };
+        actionResult = { type: 'auction', property: currentSquare };
       } else if (currentSquare.owner.id !== this.currentPlayer.id) {
-        // Payer le loyer
         const rent = currentSquare.calculateRent();
         const payment = this.currentPlayer.payRent(rent, currentSquare.owner);
-        
+
         if (!payment.success) {
-          // Le joueur ne peut pas payer, utiliser Revanche ou faire faillite
           if (this.currentPlayer.revengeToken && !this.currentPlayer.revengeActive) {
             this.state = 'revenge';
-            
-            actionResult = {
-              type: 'revenge',
-              amount: rent,
-              toPlayer: currentSquare.owner.name
-            };
+            actionResult = { type: 'revenge', amount: rent, toPlayer: currentSquare.owner.name };
           } else {
-            // Faire faillite
             this.playerBankruptcy(this.currentPlayer, currentSquare.owner);
-            
-            actionResult = {
-              type: 'bankruptcy',
-              cause: 'rent',
-              amount: rent,
-              toPlayer: currentSquare.owner.name
-            };
+            actionResult = { type: 'bankruptcy', cause: 'rent', amount: rent, toPlayer: currentSquare.owner.name };
           }
         } else {
           this.log.push(`${this.currentPlayer.name} a payé ${rent}€ de loyer à ${currentSquare.owner.name}`);
-          
-          actionResult = {
-            type: 'rent',
-            amount: rent,
-            paid: true,
-            split: payment.split,
-            toPlayer: currentSquare.owner.name
-          };
+          actionResult = { type: 'rent', amount: rent, paid: true, split: payment.split, toPlayer: currentSquare.owner.name };
         }
       }
     } else if (currentSquare.type === 'card') {
-      // Tirer une carte KCRAP
       this.state = 'card';
       const card = this.cardDeck.drawCard();
-      
       this.log.push(`${this.currentPlayer.name} a tiré une carte ${card.title}`);
-      
-      actionResult = {
-        type: 'card',
-        card: card
-      };
+      actionResult = { type: 'card', card };
     } else if (currentSquare.type === 'tax') {
-      // Payer une taxe
       const taxAmount = currentSquare.amount;
-      
+
       if (this.currentPlayer.money < taxAmount) {
-        // Le joueur ne peut pas payer, utiliser Revanche ou faire faillite
         if (this.currentPlayer.revengeToken && !this.currentPlayer.revengeActive) {
           this.state = 'revenge';
-          
-          actionResult = {
-            type: 'revenge',
-            amount: taxAmount,
-            toPlayer: null
-          };
+          actionResult = { type: 'revenge', amount: taxAmount, toPlayer: null };
         } else {
-          // Faire faillite
           this.playerBankruptcy(this.currentPlayer);
-          
-          actionResult = {
-            type: 'bankruptcy',
-            cause: 'tax',
-            amount: taxAmount
-          };
+          actionResult = { type: 'bankruptcy', cause: 'tax', amount: taxAmount };
         }
       } else {
         this.currentPlayer.money -= taxAmount;
         this.log.push(`${this.currentPlayer.name} a payé ${taxAmount}€ de taxe`);
-        
-        actionResult = {
-          type: 'tax',
-          amount: taxAmount,
-          paid: true
-        };
+        actionResult = { type: 'tax', amount: taxAmount, paid: true };
       }
     } else if (currentSquare.type === 'jail') {
-      // Aller en prison
-      this.currentPlayer.inJail = true;
-      this.currentPlayer.jailTurns = 3;
+      this.sendPlayerToJail(this.currentPlayer);
       this.log.push(`${this.currentPlayer.name} va en prison`);
-      
-      actionResult = {
-        type: 'jail',
-        turns: 3
-      };
+      actionResult = { type: 'jail', turns: 3 };
     }
-    
-    // Passage au joueur suivant si pas d'action requise
+
+    return { currentSquare, actionResult };
+  }
+
+  handleJailRoll(dice1, dice2, total, doubles) {
+    const player = this.currentPlayer;
+    let moveResult = { passedGo: false };
+    let currentSquare = this.board.getSquareAt(player.position);
+    let actionResult = null;
+
+    if (player.jailCards > 0) {
+      player.jailCards--;
+      player.releaseFromJail();
+      this.log.push(`${player.name} utilise une carte de sortie de prison`);
+      moveResult = player.move(total);
+      ({ currentSquare, actionResult } = this.processSquare());
+    } else if (doubles) {
+      player.releaseFromJail();
+      this.log.push(`${player.name} fait un double et sort de prison`);
+      moveResult = player.move(total);
+      ({ currentSquare, actionResult } = this.processSquare());
+    } else {
+      player.jailTurns--;
+      player.turnsInJail++;
+      if (player.jailTurns <= 0) {
+        if (player.payJailFine(JAIL_FINE)) {
+          this.log.push(`${player.name} paie ${JAIL_FINE}€ pour sortir de prison`);
+          moveResult = player.move(total);
+          ({ currentSquare, actionResult } = this.processSquare());
+        } else {
+          if (player.revengeToken && !player.revengeActive) {
+            this.state = 'revenge';
+            actionResult = { type: 'revenge', amount: JAIL_FINE, toPlayer: null };
+          } else {
+            this.playerBankruptcy(player);
+            actionResult = { type: 'bankruptcy', cause: 'jail-fine', amount: JAIL_FINE };
+          }
+        }
+      } else {
+        actionResult = { type: 'stay_jail', turnsLeft: player.jailTurns };
+      }
+    }
+
+    if (this.state === 'rolling' && actionResult && actionResult.type !== 'stay_jail') {
+      if (!doubles) {
+        this.nextPlayer();
+      } else {
+        this.log.push(`${player.name} a fait un double et rejoue`);
+      }
+    } else if (actionResult && actionResult.type === 'stay_jail') {
+      this.nextPlayer();
+    }
+
+    return {
+      success: true,
+      dice1,
+      dice2,
+      total,
+      doubles,
+      position: player.position,
+      passedGo: moveResult.passedGo,
+      square: currentSquare,
+      action: actionResult
+    };
+  }
+
+  rollDice() {
+    if (this.state !== 'rolling') {
+      return { success: false, message: "Ce n'est pas le moment de lancer les dés." };
+    }
+
+    const dice1 = Math.floor(Math.random() * 6) + 1;
+    const dice2 = Math.floor(Math.random() * 6) + 1;
+    const total = dice1 + dice2;
+    const doubles = dice1 === dice2;
+
+    this.log.push(`${this.currentPlayer.name} a lancé les dés: ${dice1} et ${dice2} = ${total}`);
+
+    if (this.currentPlayer.inJail) {
+      return this.handleJailRoll(dice1, dice2, total, doubles);
+    }
+
+    const moveResult = this.currentPlayer.move(total);
+    const { currentSquare, actionResult } = this.processSquare();
+
     if (this.state === 'rolling') {
       if (!doubles) {
         this.nextPlayer();
@@ -208,10 +226,10 @@ class Game {
         this.log.push(`${this.currentPlayer.name} a fait un double et rejoue`);
       }
     }
-    
+
     return {
       success: true,
-      dice1, 
+      dice1,
       dice2,
       total,
       doubles,
@@ -564,6 +582,15 @@ class Game {
       };
     }
     
+    if (card.type === 'jail') {
+      const player = this.players[playerId];
+      this.sendPlayerToJail(player);
+      this.log.push(`${player.name} est envoyé en prison par une carte`);
+      this.state = 'rolling';
+      this.nextPlayer();
+      return { success: true, message: 'Aller en prison' };
+    }
+
     const result = card.applyEffect(this, this.players[playerId], params);
     
     if (result.success) {
@@ -702,6 +729,10 @@ class Game {
         position: player.position,
         properties: player.properties.map(p => p.id),
         inJail: player.inJail,
+        jailTurns: player.jailTurns,
+        turnsInJail: player.turnsInJail,
+        jailCards: player.jailCards,
+        jailPaid: player.totalJailPayments,
         bankrupt: player.bankrupt,
         revengeToken: player.revengeToken,
         revengeActive: player.revengeActive,

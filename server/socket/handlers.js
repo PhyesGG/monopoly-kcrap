@@ -1,4 +1,4 @@
-const { createLobby, joinLobby, leaveLobby, listLobbies } = require('./lobby');
+const { createLobby, joinLobby, leaveLobby, listLobbies, reconnectPlayer, handleDisconnect } = require('./lobby');
 const { 
   startGame, 
   rollDice, 
@@ -37,6 +37,12 @@ function initSocketHandlers(io) {
         console.log('Envoi de la réponse join_lobby:', result);
         callback(result);
       }
+    });
+
+    socket.on('reconnect_player', (data, callback) => {
+      console.log('Événement reconnect_player reçu:', data);
+      const result = reconnectPlayer(socket, data);
+      if (callback) callback(result);
     });
     
     socket.on('leave_lobby', (data, callback) => {
@@ -107,7 +113,7 @@ function initSocketHandlers(io) {
     // Déconnexion
     socket.on('disconnect', () => {
       console.log(`Déconnexion socket: ${socket.id}`);
-      leaveLobby(socket);
+      handleDisconnect(socket);
     });
   });
   

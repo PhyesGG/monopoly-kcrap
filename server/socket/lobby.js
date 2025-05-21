@@ -1,37 +1,43 @@
 const Game = require('../game/Game');
+const { v4: uuidv4 } = require('uuid');
 
 // Stocker les lobbies actifs
 const lobbies = {};
 
-// Stocker les connexions des joueurs (socket.id -> lobby)
+// Stocker les connexions des joueurs
+// socket.id -> { lobbyId, token }
 const playerConnections = {};
 
 function createLobby(socket, { playerName, lobbyName }) {
   console.log('Demande de création de lobby:', { playerName, lobbyName, socketId: socket.id });
-  
-  if (!playerName || !lobbyName) {
-    return { 
-      success: false, 
-      message: "Nom de joueur et nom de lobby requis" 
+
+  if (typeof playerName !== 'string' || playerName.trim() === '' ||
+      typeof lobbyName !== 'string' || lobbyName.trim() === '') {
+    return {
+      success: false,
+      message: "Nom de joueur et nom de lobby requis"
     };
   }
   
   const lobbyId = generateLobbyId();
-  
+  const token = uuidv4();
+
   lobbies[lobbyId] = {
     id: lobbyId,
     name: lobbyName,
     host: socket.id,
     players: [{
       id: socket.id,
-      name: playerName
+      token,
+      name: playerName,
+      connected: true
     }],
     game: null,
     createdAt: Date.now()
   };
-  
+
   // Associer le socket au lobby
-  playerConnections[socket.id] = lobbyId;
+  playerConnections[socket.id] = { lobbyId, token };
   
   // Rejoindre la salle socket du lobby
   socket.join(lobbyId);
@@ -44,18 +50,20 @@ function createLobby(socket, { playerName, lobbyName }) {
       id: lobbyId,
       name: lobbyName,
       players: lobbies[lobbyId].players,
-      isHost: true
+      isHost: true,
+      token
     }
   };
 }
 
 function joinLobby(socket, { playerName, lobbyId }) {
   console.log('Demande de rejoindre le lobby:', { playerName, lobbyId, socketId: socket.id });
-  
-  if (!playerName || !lobbyId) {
-    return { 
-      success: false, 
-      message: "Nom de joueur et ID de lobby requis" 
+
+  if (typeof playerName !== 'string' || playerName.trim() === '' ||
+      typeof lobbyId !== 'string' || lobbyId.trim() === '') {
+    return {
+      success: false,
+      message: "Nom de joueur et ID de lobby requis"
     };
   }
   
@@ -87,13 +95,16 @@ function joinLobby(socket, { playerName, lobbyId }) {
   }
   
   // Ajouter le joueur au lobby
+  const token = uuidv4();
   lobby.players.push({
     id: socket.id,
-    name: playerName
+    token,
+    name: playerName,
+    connected: true
   });
-  
+
   // Associer le socket au lobby
-  playerConnections[socket.id] = lobbyId;
+  playerConnections[socket.id] = { lobbyId, token };
   
   // Rejoindre la salle socket du lobby
   socket.join(lobbyId);
@@ -114,7 +125,55 @@ function joinLobby(socket, { playerName, lobbyId }) {
       id: lobbyId,
       name: lobby.name,
       players: lobby.players,
-      isHost: socket.id === lobby.host
+      isHost: socket.id === lobby.host,
+      token
+    }
+  };
+}
+
+function reconnectPlayer(socket, { lobbyId, token, previousSocketId }) {
+  if (typeof lobbyId !== 'string' || lobbyId.trim() === '') {
+    return { success: false, message: 'ID de lobby requis' };
+  }
+
+  const lobby = lobbies[lobbyId];
+  if (!lobby) {
+    return { success: false, message: 'Lobby non trouvé' };
+  }
+
+  const player = lobby.players.find(p => p.token === token || p.id === previousSocketId);
+  if (!player) {
+    return { success: false, message: 'Joueur non trouvé' };
+  }
+
+  const oldId = player.id;
+  player.id = socket.id;
+  player.connected = true;
+  playerConnections[socket.id] = { lobbyId, token: player.token };
+  delete playerConnections[oldId];
+
+  if (lobby.host === oldId) {
+    lobby.host = socket.id;
+  }
+
+  if (lobby.game) {
+    const gamePlayer = Object.values(lobby.game.players).find(pl => pl.socketId === oldId);
+    if (gamePlayer) {
+      gamePlayer.socketId = socket.id;
+    }
+  }
+
+  socket.join(lobbyId);
+  socket.to(lobbyId).emit('player_reconnected', { playerName: player.name });
+
+  return {
+    success: true,
+    lobby: {
+      id: lobbyId,
+      name: lobby.name,
+      players: lobby.players,
+      isHost: socket.id === lobby.host,
+      token: player.token
     }
   };
 }
@@ -122,7 +181,7 @@ function joinLobby(socket, { playerName, lobbyId }) {
 function leaveLobby(socket, { lobbyId } = {}) {
   // Si l'ID du lobby n'est pas fourni, essayer de le récupérer à partir des connexions
   if (!lobbyId) {
-    lobbyId = playerConnections[socket.id];
+    lobbyId = playerConnections[socket.id]?.lobbyId;
   }
   
   if (!lobbyId || !lobbies[lobbyId]) {
@@ -133,9 +192,10 @@ function leaveLobby(socket, { lobbyId } = {}) {
   }
   
   const lobby = lobbies[lobbyId];
-  
+  const token = playerConnections[socket.id]?.token;
+
   // Retirer le joueur du lobby
-  const playerIndex = lobby.players.findIndex(p => p.id === socket.id);
+  const playerIndex = lobby.players.findIndex(p => p.id === socket.id || p.token === token);
   
   if (playerIndex !== -1) {
     const playerName = lobby.players[playerIndex].name;
@@ -195,12 +255,35 @@ function listLobbies() {
 }
 
 function getLobbyBySocketId(socketId) {
-  const lobbyId = playerConnections[socketId];
-  return lobbyId ? lobbies[lobbyId] : null;
+  const connection = playerConnections[socketId];
+  return connection ? lobbies[connection.lobbyId] : null;
 }
 
 function getLobbyById(lobbyId) {
   return lobbies[lobbyId] || null;
+}
+
+function handleDisconnect(socket) {
+  const connection = playerConnections[socket.id];
+  if (!connection) {
+    return;
+  }
+
+  const lobby = lobbies[connection.lobbyId];
+  if (!lobby) {
+    delete playerConnections[socket.id];
+    return;
+  }
+
+  const player = lobby.players.find(p => p.id === socket.id);
+  if (player) {
+    player.connected = false;
+  }
+
+  delete playerConnections[socket.id];
+  socket.leave(lobby.id);
+
+  socket.to(lobby.id).emit('player_disconnected', { playerName: player?.name });
 }
 
 // Générer un ID de lobby de 6 caractères
@@ -216,9 +299,11 @@ function generateLobbyId() {
 module.exports = {
   createLobby,
   joinLobby,
+  reconnectPlayer,
   leaveLobby,
   listLobbies,
   getLobbyBySocketId,
   getLobbyById,
+  handleDisconnect,
   lobbies
 };

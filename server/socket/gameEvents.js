@@ -84,6 +84,9 @@ function rollDice(io, socket, data) {
 }
 
 function placeBid(io, socket, { amount }) {
+  if (typeof amount !== 'number' || amount <= 0) {
+    return { success: false, message: 'Montant invalide' };
+  }
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {
@@ -281,6 +284,9 @@ function declineRevenge(io, socket) {
 }
 
 function createAlliance(io, socket, { targetPlayerId }) {
+  if (typeof targetPlayerId !== 'string' || targetPlayerId.trim() === '') {
+    return { success: false, message: 'ID de joueur cible requis' };
+  }
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {
@@ -320,6 +326,9 @@ function createAlliance(io, socket, { targetPlayerId }) {
 }
 
 function breakAlliance(io, socket, { unilateral = true }) {
+  if (typeof unilateral !== 'boolean') {
+    return { success: false, message: 'Paramètre invalide' };
+  }
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {
@@ -359,6 +368,9 @@ function breakAlliance(io, socket, { unilateral = true }) {
 }
 
 function applyCardEffect(io, socket, { cardId, params }) {
+  if (typeof cardId !== 'string' || cardId.trim() === '') {
+    return { success: false, message: 'Carte invalide' };
+  }
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {

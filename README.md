@@ -39,3 +39,8 @@ Les tests Jest se trouvent dans le dossier `tests/` :
 ```bash
 npm test
 ```
+
+### Sauvegarde et reconnexion
+
+Le serveur prend en charge la reconnexion des joueurs via l'événement `reconnect_player`.
+Les chemins de sauvegarde et le port du serveur peuvent être configurés dans `server/config.js`.

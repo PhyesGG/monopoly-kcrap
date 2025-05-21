@@ -1,8 +1,9 @@
 const Game = require('../game/Game');
 const { v4: uuidv4 } = require('uuid');
+const { saveLobbies, loadLobbies } = require('../utils/saveSystem');
 
 // Stocker les lobbies actifs
-const lobbies = {};
+let lobbies = loadLobbies();
 
 // Stocker les connexions des joueurs
 // socket.id -> { lobbyId, token }
@@ -41,9 +42,11 @@ function createLobby(socket, { playerName, lobbyName }) {
   
   // Rejoindre la salle socket du lobby
   socket.join(lobbyId);
-  
+
   console.log('Lobby créé avec succès:', lobbyId);
-  
+
+  saveLobbies(lobbies);
+
   return {
     success: true,
     lobby: {
@@ -116,9 +119,11 @@ function joinLobby(socket, { playerName, lobbyId }) {
       name: playerName
     }
   });
-  
+
   console.log('Joueur ajouté au lobby avec succès:', playerName);
-  
+
+  saveLobbies(lobbies);
+
   return {
     success: true,
     lobby: {
@@ -132,6 +137,8 @@ function joinLobby(socket, { playerName, lobbyId }) {
 }
 
 function reconnectPlayer(socket, { lobbyId, token, previousSocketId }) {
+  // Recharger l'état au cas où le serveur aurait redémarré
+  lobbies = loadLobbies();
   if (typeof lobbyId !== 'string' || lobbyId.trim() === '') {
     return { success: false, message: 'ID de lobby requis' };
   }
@@ -165,6 +172,8 @@ function reconnectPlayer(socket, { lobbyId, token, previousSocketId }) {
 
   socket.join(lobbyId);
   socket.to(lobbyId).emit('player_reconnected', { playerName: player.name });
+
+  saveLobbies(lobbies);
 
   return {
     success: true,
@@ -227,7 +236,9 @@ function leaveLobby(socket, { lobbyId } = {}) {
     
     // Quitter la salle socket
     socket.leave(lobbyId);
-    
+
+    saveLobbies(lobbies);
+
     return { success: true };
   }
   
@@ -284,6 +295,8 @@ function handleDisconnect(socket) {
   socket.leave(lobby.id);
 
   socket.to(lobby.id).emit('player_disconnected', { playerName: player?.name });
+
+  saveLobbies(lobbies);
 }
 
 // Générer un ID de lobby de 6 caractères

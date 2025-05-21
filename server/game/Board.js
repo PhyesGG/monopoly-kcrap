@@ -110,7 +110,3 @@ class Board {
       }
       return cleanSquare;
     });
-  }
-}
-
-module.exports = Board;

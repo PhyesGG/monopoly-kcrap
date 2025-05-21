@@ -23,7 +23,8 @@ const CARD_TYPES = {
   EXCHANGE: 'exchange',
   RESTRUCTURE: 'restructure',
   HOSTILE: 'hostile',
-  DIGITAL: 'digital'
+  DIGITAL: 'digital',
+  JAIL: 'jail'
 };
 
 module.exports = {

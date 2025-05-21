@@ -2,7 +2,7 @@
 class KcrapCard {
   constructor(id, type, title, description) {
     this.id = id;
-    this.type = type; // 'crypto', 'exchange', 'restructure', 'hostile', 'digital'
+    this.type = type; // 'crypto', 'exchange', 'restructure', 'hostile', 'digital', 'jail'
     this.title = title;
     this.description = description;
     this.effectApplied = false;
@@ -20,6 +20,8 @@ class KcrapCard {
         return this.applyHostileEffect(game, player, params);
       case 'digital':
         return this.applyDigitalEffect(game);
+      case 'jail':
+        return { success: true }; // Géré directement dans Game
       default:
         return {
           success: false,

@@ -73,26 +73,32 @@ class Board {
       position: 9
     });
     
-    // Note: pour un jeu complet, il faudrait ajouter les 40 cases
-    // J'ajoute seulement quelques cases de plus pour l'exemple
-    
+    // Propriétés supplémentaires pour compléter le plateau classique
     const p6 = new Property(10, 'Boulevard de la Villette', 140, 'pink');
     p6.type = 'property';
     p6.position = 10;
     squares.push(p6);
-    
+
     const p7 = new Property(11, 'Avenue de Neuilly', 140, 'pink');
     p7.type = 'property';
     p7.position = 11;
     squares.push(p7);
-    
+
     squares.push({
       id: 12,
       type: 'card',
       name: 'KCRAP',
       position: 12
     });
-    
+
+    // Compléter le reste des cases avec des emplacements génériques
+    for (let i = 13; i < 40; i++) {
+      const prop = new Property(i, `Propriété ${i}`, 100 + (i - 13) * 10, 'extra');
+      prop.type = 'property';
+      prop.position = i;
+      squares.push(prop);
+    }
+
     return squares;
   }
 

@@ -56,6 +56,9 @@ export function initSocket(url = window.location.origin) {
   socket.on('dice_rolled', ({ result, gameState }) => {
     console.log('Dés lancés:', result);
     setDiceResult(result);
+    if (result.action && result.action.type === 'card') {
+      setCardState({ card: result.action.card, applied: false });
+    }
     updateGameState(gameState);
   });
   

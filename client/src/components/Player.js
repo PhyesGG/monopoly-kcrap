@@ -16,8 +16,9 @@ export function initPlayers(target = 'players-info') {
       const el = document.createElement('div');
       el.className = 'player-card';
       el.dataset.id = player.id;
+      const allianceInfo = player.currentAlliance ? `<span class="player-alliance">🤝</span>` : '';
       el.innerHTML = `
-        <div class="player-name">${player.name}</div>
+        <div class="player-name">${player.name} ${allianceInfo}</div>
         <div class="player-money">${player.money}€</div>
       `;
       container.appendChild(el);

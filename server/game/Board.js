@@ -1,3 +1,5 @@
+const Property = require('./Property');
+
 class Board {
   constructor() {
     this.squares = this.initializeBoard();
@@ -15,17 +17,7 @@ class Board {
     });
     
     // Propriétés marron
-    squares.push({
-      id: 1,
-      type: 'property',
-      name: 'Boulevard de Belleville',
-      position: 1,
-      price: 60,
-      group: 'brown',
-      owner: null,
-      houses: 0,
-      hotel: false
-    });
+    squares.push(new Property(1, 'Boulevard de Belleville', 60, 'brown', 1));
     
     squares.push({
       id: 2,
@@ -34,17 +26,7 @@ class Board {
       position: 2
     });
     
-    squares.push({
-      id: 3,
-      type: 'property',
-      name: 'Rue Lecourbe',
-      position: 3,
-      price: 60,
-      group: 'brown',
-      owner: null,
-      houses: 0,
-      hotel: false
-    });
+    squares.push(new Property(3, 'Rue Lecourbe', 60, 'brown', 3));
     
     squares.push({
       id: 4,
@@ -55,29 +37,9 @@ class Board {
     });
     
     // Propriétés bleu clair
-    squares.push({
-      id: 5,
-      type: 'property',
-      name: 'Rue de Vaugirard',
-      position: 5,
-      price: 100,
-      group: 'light-blue',
-      owner: null,
-      houses: 0,
-      hotel: false
-    });
+    squares.push(new Property(5, 'Rue de Vaugirard', 100, 'light-blue', 5));
     
-    squares.push({
-      id: 6,
-      type: 'property',
-      name: 'Rue de Courcelles',
-      position: 6,
-      price: 100,
-      group: 'light-blue',
-      owner: null,
-      houses: 0,
-      hotel: false
-    });
+    squares.push(new Property(6, 'Rue de Courcelles', 100, 'light-blue', 6));
     
     squares.push({
       id: 7,
@@ -86,17 +48,7 @@ class Board {
       position: 7
     });
     
-    squares.push({
-      id: 8,
-      type: 'property',
-      name: 'Avenue de la République',
-      position: 8,
-      price: 120,
-      group: 'light-blue',
-      owner: null,
-      houses: 0,
-      hotel: false
-    });
+    squares.push(new Property(8, 'Avenue de la République', 120, 'light-blue', 8));
     
     // Prison - Visite
     squares.push({
@@ -109,29 +61,9 @@ class Board {
     // Note: pour un jeu complet, il faudrait ajouter les 40 cases
     // J'ajoute seulement quelques cases de plus pour l'exemple
     
-    squares.push({
-      id: 10,
-      type: 'property',
-      name: 'Boulevard de la Villette',
-      position: 10,
-      price: 140,
-      group: 'pink',
-      owner: null,
-      houses: 0,
-      hotel: false
-    });
+    squares.push(new Property(10, 'Boulevard de la Villette', 140, 'pink', 10));
     
-    squares.push({
-      id: 11,
-      type: 'property',
-      name: 'Avenue de Neuilly',
-      position: 11,
-      price: 140,
-      group: 'pink',
-      owner: null,
-      houses: 0,
-      hotel: false
-    });
+    squares.push(new Property(11, 'Avenue de Neuilly', 140, 'pink', 11));
     
     squares.push({
       id: 12,

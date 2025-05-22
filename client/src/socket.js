@@ -11,7 +11,7 @@ import {
 // Gestionnaire de connexion au serveur
 let socket = null;
 
-export function initSocket(url = window.location.origin) {
+export function initSocket(url = window.location.origin, onConnect) {
   if (socket) {
     socket.disconnect();
   }
@@ -25,6 +25,7 @@ export function initSocket(url = window.location.origin) {
   // Écouter l'événement de connexion
   socket.on('connect', () => {
     console.log('Connexion socket.io établie avec succès, socket ID:', socket.id);
+    if (onConnect) onConnect();
   });
   
   socket.on('connect_error', (error) => {
@@ -461,6 +462,23 @@ export function unmortgageProperty(propertyId) {
     socket.emit('unmortgage_property', { propertyId }, (response) => {
       if (response && response.success) {
         resolve(response);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
+export function reconnectPlayer(lobbyId, token, previousSocketId) {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('reconnect_player', { lobbyId, token, previousSocketId }, (response) => {
+      if (response && response.success) {
+        resolve(response.lobby);
       } else {
         reject(new Error(response ? response.message : 'Erreur inconnue'));
       }

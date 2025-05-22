@@ -89,6 +89,13 @@ class Property {
     if (this.owner && !this.houses && !this.hotel) {
       this.originalOwner = this.owner;
       this.temporaryOwner = newOwner;
+      // Changer temporairement le propriétaire
+      this.owner = newOwner;
+      const idx = this.originalOwner.properties.findIndex(p => p.id === this.id);
+      if (idx > -1) {
+        this.originalOwner.properties.splice(idx, 1);
+      }
+      newOwner.properties.push(this);
       this.temporaryOwnerTurns = turns;
       return true;
     }
@@ -98,9 +105,20 @@ class Property {
   updateTemporaryOwnership() {
     if (this.temporaryOwner) {
       this.temporaryOwnerTurns--;
-      
+
       if (this.temporaryOwnerTurns <= 0) {
+        // Retirer la propriété du joueur temporaire
+        const idxTemp = this.temporaryOwner.properties.findIndex(p => p.id === this.id);
+        if (idxTemp > -1) {
+          this.temporaryOwner.properties.splice(idxTemp, 1);
+        }
+
+        // Restituer la propriété à son propriétaire d'origine
         this.owner = this.originalOwner;
+        if (!this.originalOwner.properties.includes(this)) {
+          this.originalOwner.properties.push(this);
+        }
+
         this.temporaryOwner = null;
         this.originalOwner = null;
         return true; // Propriété rendue

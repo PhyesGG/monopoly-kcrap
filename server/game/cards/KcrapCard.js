@@ -212,7 +212,13 @@ class KcrapCard {
     }
     
     // Prendre le contrôle de la propriété
-    targetProperty.applyHostileTakeover(player, 3); // 3 tours
+    if (targetProperty.applyHostileTakeover(player, 3)) {
+      const index = originalOwner.properties.findIndex(p => p.id === targetProperty.id);
+      if (index > -1) {
+        originalOwner.properties.splice(index, 1);
+      }
+      player.properties.push(targetProperty);
+    }
     
     this.effectApplied = true;
     

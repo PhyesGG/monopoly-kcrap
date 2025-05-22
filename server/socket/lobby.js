@@ -173,7 +173,8 @@ function reconnectPlayer(socket, { lobbyId, token, previousSocketId }) {
       name: lobby.name,
       players: lobby.players,
       isHost: socket.id === lobby.host,
-      token: player.token
+      token: player.token,
+      gameState: lobby.game ? lobby.game.getGameState() : null
     }
   };
 }

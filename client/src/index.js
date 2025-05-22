@@ -16,16 +16,22 @@ import {
   buyHouse,
   buyHotel,
   mortgageProperty,
-  unmortgageProperty
+  unmortgageProperty,
+  reconnectPlayer
 } from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
+import { getPlayerState, setPlayerState, clearPlayerState } from './state/player';
 import { initBoard } from './components/Board.js';
 
 // Initialiser la connexion socket
 document.addEventListener('DOMContentLoaded', () => {
-  initSocket();
-  renderHomePage();
+  initSocket(async () => {
+    const restored = await attemptAutoReconnect();
+    if (!restored) {
+      renderHomePage();
+    }
+  });
 });
 
 function renderHomePage() {
@@ -137,6 +143,12 @@ async function handleCreateLobby() {
     console.log('Tentative de création de salon avec:', { playerName, lobbyName });
     const lobby = await createLobby(playerName, lobbyName);
     console.log('Salon créé avec succès:', lobby);
+    setPlayerState({
+      name: playerName,
+      lobbyId: lobby.id,
+      token: lobby.token,
+      socketId: getSocket().id
+    });
     showLobbyScreen(lobby);
   } catch (error) {
     console.error('Erreur lors de la création du salon:', error);
@@ -158,6 +170,12 @@ async function handleJoinLobby() {
     console.log('Tentative de rejoindre le salon avec:', { playerName, lobbyId });
     const lobby = await joinLobby(playerName, lobbyId);
     console.log('Salon rejoint avec succès:', lobby);
+    setPlayerState({
+      name: playerName,
+      lobbyId: lobby.id,
+      token: lobby.token,
+      socketId: getSocket().id
+    });
     showLobbyScreen(lobby);
   } catch (error) {
     console.error('Erreur lors de l\'adhésion au salon:', error);
@@ -351,11 +369,34 @@ async function handleLeaveLobby() {
     console.log('Tentative de quitter le salon');
     await leaveLobby();
     console.log('Salon quitté avec succès');
+    clearPlayerState();
     // Retourner à l'écran des lobbies
     renderHomePage();
   } catch (error) {
     console.error('Erreur lors de la sortie du salon:', error);
     alert(`Erreur: ${error.message}`);
+  }
+}
+
+async function attemptAutoReconnect() {
+  const state = getPlayerState();
+  if (!state || !state.lobbyId || !state.token) {
+    return false;
+  }
+
+  try {
+    const lobby = await reconnectPlayer(state.lobbyId, state.token, state.socketId);
+    setPlayerState({ ...state, socketId: getSocket().id });
+    if (lobby.gameState) {
+      showGameScreen(lobby.gameState);
+    } else {
+      showLobbyScreen(lobby);
+    }
+    return true;
+  } catch (error) {
+    console.error('Reconnexion échouée:', error);
+    clearPlayerState();
+    return false;
   }
 }
 

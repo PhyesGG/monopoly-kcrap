@@ -130,6 +130,18 @@ describe('Game core methods', () => {
     expect(charlie.money).toBe(expectedCharlie);
   });
 
+  test('landing on goto-jail sends player to jail', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    game.addPlayer('Bob', 's2');
+
+    game.currentPlayer = alice;
+    alice.position = 29; // goto-jail square
+
+    const result = game.processSquare();
+    expect(result.actionResult.type).toBe('jail');
+    expect(alice.inJail).toBe(true);
+  });
+
   test('save and load game state', () => {
     const p1 = game.addPlayer('Alice', 's1');
     const p2 = game.addPlayer('Bob', 's2');

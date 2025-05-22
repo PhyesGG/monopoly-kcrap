@@ -199,10 +199,12 @@ class Game {
         this.log.push(`${this.currentPlayer.name} a payé ${taxAmount}€ de taxe`);
         actionResult = { type: 'tax', amount: taxAmount, paid: true };
       }
-    } else if (currentSquare.type === 'jail') {
+    } else if (currentSquare.type === 'goto-jail') {
       this.sendPlayerToJail(this.currentPlayer);
       this.log.push(`${this.currentPlayer.name} va en prison`);
       actionResult = { type: 'jail', turns: 3 };
+    } else if (currentSquare.type === 'jail') {
+      actionResult = { type: 'visit_jail' };
     }
 
     return { currentSquare, actionResult };

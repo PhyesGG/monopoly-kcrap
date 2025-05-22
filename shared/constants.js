@@ -14,7 +14,8 @@ const SQUARE_TYPES = {
   PROPERTY: 'property',
   CARD: 'card',
   TAX: 'tax',
-  JAIL: 'jail'
+  JAIL: 'jail',
+  GOTO_JAIL: 'goto-jail'
 };
 
 // Types de cartes KCRAP

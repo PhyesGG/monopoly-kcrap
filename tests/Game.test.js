@@ -236,6 +236,25 @@ describe('Game core methods', () => {
     expect(Object.keys(loaded.game.players)).toHaveLength(2);
     expect(loaded.game.digitalDisruptionTurnsLeft).toBe(2);
 
-    fs.unlinkSync(path.join(SAVE_PATH, `${game.id}.json`));
+  fs.unlinkSync(path.join(SAVE_PATH, `${game.id}.json`));
+  });
+
+  test('fromState restores socket IDs', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    const bob = game.addPlayer('Bob', 's2');
+
+    const state = game.getGameState();
+    state.players.forEach(p => {
+      if (p.name === 'Alice') p.socketId = 's1';
+      if (p.name === 'Bob') p.socketId = 's2';
+    });
+
+    const restored = Game.fromState(state);
+    const restoredPlayers = Object.values(restored.players);
+    const restoredAlice = restoredPlayers.find(p => p.name === 'Alice');
+    const restoredBob = restoredPlayers.find(p => p.name === 'Bob');
+
+    expect(restoredAlice.socketId).toBe('s1');
+    expect(restoredBob.socketId).toBe('s2');
   });
 });

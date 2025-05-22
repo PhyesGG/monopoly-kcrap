@@ -32,7 +32,7 @@ class Game {
     // Reconstruire les joueurs
     game.players = {};
     state.players.forEach(pData => {
-      const player = new Player(pData.name, null);
+      const player = new Player(pData.name, pData.socketId || null);
       player.id = pData.id;
       player.money = pData.money;
       player.position = pData.position;

@@ -48,3 +48,10 @@ Les chemins de sauvegarde et le port du serveur peuvent être configurés dans `
 Le client tente désormais automatiquement de se reconnecter lorsqu'un état joueur est
 présent dans `localStorage`. Si la reconnexion réussit et qu'une partie est en cours,
 l'écran de jeu est restauré.
+
+### Persistance du pseudonyme
+
+Le client mémorise désormais le dernier nom de joueur saisi dans `localStorage`.
+Lorsque la page d'accueil est affichée, ce pseudonyme est automatiquement
+prérempli dans les champs "Votre nom". Ainsi, il n'est plus nécessaire de le
+renseigner à chaque nouvelle connexion.

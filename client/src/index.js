@@ -22,6 +22,7 @@ import {
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
 import { getPlayerState, setPlayerState, clearPlayerState } from './state/player';
+import { getUsername, setUsername } from './state/username';
 import { initBoard } from './components/Board.js';
 
 // Initialiser la connexion socket
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function renderHomePage() {
   const app = document.getElementById('app');
-  
+
   app.innerHTML = `
     <div class="home-container">
       <div class="grid-lines"></div>
@@ -104,6 +105,10 @@ function renderHomePage() {
       </div>
     </div>
   `;
+
+  const storedName = getUsername();
+  document.getElementById('player-name').value = storedName;
+  document.getElementById('join-player-name').value = storedName;
   
   // Ajouter les polices et icônes
   if (!document.querySelector('link[href*="font-awesome"]')) {
@@ -133,6 +138,7 @@ function renderHomePage() {
 async function handleCreateLobby() {
   const playerName = document.getElementById('player-name').value;
   const lobbyName = document.getElementById('lobby-name').value;
+  setUsername(playerName);
   
   if (!playerName || !lobbyName) {
     alert('Veuillez entrer un nom de joueur et un nom de salon.');
@@ -160,6 +166,7 @@ async function handleCreateLobby() {
 async function handleJoinLobby() {
   const playerName = document.getElementById('join-player-name').value;
   const lobbyId = document.getElementById('lobby-id').value;
+  setUsername(playerName);
   
   if (!playerName || !lobbyId) {
     alert('Veuillez entrer un nom de joueur et un ID de salon.');
@@ -227,6 +234,7 @@ function renderLobbiesList(lobbies) {
     button.addEventListener('click', async (e) => {
       const lobbyId = e.target.dataset.id;
       const playerName = document.getElementById('join-player-name').value;
+      setUsername(playerName);
       
       if (!playerName) {
         alert('Veuillez entrer un nom de joueur.');

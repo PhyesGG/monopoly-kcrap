@@ -19,20 +19,55 @@ class Property {
     this.temporaryOwnerTurns = 0; // Pour la carte "Fusion hostile"
   }
 
-  calculateRent() {
+  calculateRent({ diceTotal = 0, board = null } = {}) {
     if (!this.owner || this.mortgaged) return 0;
-    
-    // Calcul du loyer de base (simplifié)
+
+    // Règles spéciales pour les gares
+    if (this.group === 'railroad' && board) {
+      const railroadsOwned = board.squares.filter(
+        sq =>
+          sq.type === 'property' &&
+          sq.group === 'railroad' &&
+          sq.owner &&
+          sq.owner.id === this.owner.id
+      ).length;
+      return 25 * railroadsOwned;
+    }
+
+    // Règles spéciales pour les compagnies de services
+    if (this.group === 'utility' && board) {
+      const utilitiesOwned = board.squares.filter(
+        sq =>
+          sq.type === 'property' &&
+          sq.group === 'utility' &&
+          sq.owner &&
+          sq.owner.id === this.owner.id
+      ).length;
+      const multiplier = utilitiesOwned >= 2 ? 10 : 4;
+      return diceTotal * multiplier;
+    }
+
+    // Calcul du loyer de base
     let rent = this.price * 0.1;
-    
+
+    // Double loyer si monopole sans construction
+    if (board && !this.houses && !this.hotel) {
+      const sameGroup = board.squares.filter(
+        sq => sq.type === 'property' && sq.group === this.group
+      );
+      if (sameGroup.every(p => p.owner && p.owner.id === this.owner.id)) {
+        rent *= 2;
+      }
+    }
+
     if (this.houses > 0) {
       rent = rent * (1 + this.houses * 0.5);
     }
-    
+
     if (this.hotel) {
       rent = rent * 3;
     }
-    
+
     return Math.floor(rent);
   }
 

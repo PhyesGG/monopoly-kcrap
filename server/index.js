@@ -4,6 +4,7 @@ const socketIO = require('socket.io');
 const path = require('path');
 const { findAvailablePort } = require('./utils/portFinder');
 const { initSocketHandlers } = require('./socket/handlers');
+const { loadSavedGames } = require('./utils/gamePersistence');
 
 // Configuration du serveur
 const DEFAULT_PORT = 3000;
@@ -17,6 +18,10 @@ async function startServer() {
     // Trouver un port disponible
     const port = await findAvailablePort(DEFAULT_PORT);
     
+    // Charger les parties sauvegardées
+    const saved = loadSavedGames();
+    console.log(`Jeux sauvegardés chargés: ${Object.keys(saved).length}`);
+
     // Configuration de Socket.io
     const io = socketIO(server, {
       cors: {

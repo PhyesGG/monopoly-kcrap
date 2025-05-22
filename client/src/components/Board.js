@@ -17,14 +17,27 @@ export function initBoard(target = 'board') {
     container.innerHTML = '';
     if (!state || !state.board) return;
 
+    const currentPlayer = state.players.find(p => p.id === state.currentPlayer);
+
     state.board.forEach(square => {
       const el = document.createElement('div');
-      el.className = `board-square ${square.type}`;
+      let classes = `board-square ${square.type}`;
+      if (square.group) classes += ` group-${square.group}`;
+      if (currentPlayer && square.id === currentPlayer.position) {
+        classes += ' active-square';
+      }
+      if (square.mortgaged) classes += ' mortgaged';
+      el.className = classes;
       el.dataset.id = square.id;
-      el.innerHTML = `<div class="square-name">${square.name}</div><div class="tokens"></div>`;
-      el.style.minHeight = '60px';
-      el.style.border = '1px solid rgba(0,0,0,0.2)';
-      el.style.padding = '2px';
+
+      let buildingsHTML = '';
+      if (square.hotel) {
+        buildingsHTML = '<div class="square-buildings hotel">🏨</div>';
+      } else if (square.houses && square.houses > 0) {
+        buildingsHTML = `<div class="square-buildings houses">${'🏠'.repeat(square.houses)}</div>`;
+      }
+
+      el.innerHTML = `<div class="square-name">${square.name}</div><div class="tokens"></div>${buildingsHTML}`;
       container.appendChild(el);
     });
 

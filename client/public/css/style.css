@@ -860,6 +860,70 @@ body::before {
   position: relative;
 }
 
+.board-square {
+  background: rgba(13, 13, 23, 0.6);
+  border: 1px solid rgba(0, 255, 187, 0.1);
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 60px;
+  position: relative;
+}
+
+.board-square.property {
+  border-top-width: 6px;
+}
+
+.board-square.active-square {
+  box-shadow: 0 0 8px var(--secondary-color);
+}
+
+.board-square.mortgaged {
+  opacity: 0.6;
+}
+
+.board-square .square-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.board-square .tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.square-buildings {
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.player-token {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--secondary-color);
+  color: #000;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.group-brown { border-top-color: #964B00; }
+.group-light-blue { border-top-color: #ADD8E6; }
+.group-pink { border-top-color: #FF69B4; }
+.group-orange { border-top-color: #FFA500; }
+.group-red { border-top-color: #FF4B4B; }
+.group-yellow { border-top-color: #FFD700; }
+.group-green { border-top-color: #2ECC71; }
+.group-dark-blue { border-top-color: #00008B; }
+.group-railroad { border-top-color: #FFFFFF; }
+.group-utility { border-top-color: #CCCCCC; }
+
 #board-container::before {
   content: '';
   position: absolute;

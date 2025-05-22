@@ -177,6 +177,22 @@ describe('Game core methods', () => {
     expect(bob.money).toBe(1500 + rent);
   });
 
+  test('landing on goto-jail sends player to jail', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    game.addPlayer('Bob', 's2');
+    jest.spyOn(global.Math, 'random').mockReturnValue(0);
+    game.startGame();
+    Math.random.mockRestore();
+
+    game.currentPlayer = alice;
+    alice.position = 29; // "Allez en Prison"
+
+    const result = game.processSquare();
+    expect(result.actionResult.type).toBe('jail');
+    expect(alice.inJail).toBe(true);
+    expect(alice.position).toBe(9);
+  });
+
   test('cannot build house without full set', () => {
     const alice = game.addPlayer('Alice', 's1');
     game.addPlayer('Bob', 's2');

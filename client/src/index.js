@@ -514,24 +514,139 @@ function handleAuctionUI(auction) {
 }
 
 function handleCardUI(card) {
-  // Pour une implémentation simplifiée
   const gameControls = document.getElementById('game-controls');
-  
-  if (!card.applied) {
+  const state = getGameState();
+
+  if (card.applied) {
     gameControls.innerHTML = `
       <div class="card-controls">
-        <h3>Carte tirée</h3>
-        <div class="card-preview">
-          <div class="card-title">${card.card.title}</div>
-          <div class="card-description">${card.card.description}</div>
-        </div>
-        <button id="apply-card-btn" class="btn btn-secondary">Appliquer l'effet</button>
+        <p>${card.message || 'Effet appliqué'}</p>
+        <button id="roll-dice-btn" class="btn action-btn">
+          <i class="fas fa-dice"></i> Lancer les dés
+        </button>
       </div>
     `;
-    
-    document.getElementById('apply-card-btn').addEventListener('click', () => {
-      applyCardEffect(card.card.id, {});
+    document.getElementById('roll-dice-btn').addEventListener('click', handleRollDice);
+    return;
+  }
+
+  const player = state.players.find(p => p.id === state.currentPlayer);
+  const board = state.board || [];
+
+  const getProp = id => board.find(s => s.id === id);
+
+  let html = `
+    <div class="card-controls">
+      <h3>${card.card.title}</h3>
+      <p>${card.card.description}</p>
+  `;
+
+  if (card.card.type === 'exchange') {
+    const myOptions = (player.properties || [])
+      .map(id => `<option value="${id}">${getProp(id)?.name || id}</option>`) 
+      .join('');
+    const otherPlayers = state.players.filter(p => p.id !== player.id && !p.bankrupt);
+    const otherOptions = otherPlayers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    const firstOther = otherPlayers[0];
+    const targetProps = firstOther ? firstOther.properties.map(id => `<option value="${id}">${getProp(id)?.name || id}</option>`).join('') : '';
+
+    html += `
+      <form class="exchange-form">
+        <label>Votre propriété
+          <select name="selected-property">${myOptions}</select>
+        </label>
+        <label>Adversaire
+          <select name="target-player">${otherOptions}</select>
+        </label>
+        <label>Propriété cible
+          <select name="target-property">${targetProps}</select>
+        </label>
+        <button type="submit" class="btn btn-secondary">Échanger</button>
+      </form>
+    `;
+  } else if (card.card.type === 'restructure') {
+    const propOptions = (player.properties || [])
+      .map(id => `<option value="${id}">${getProp(id)?.name || id}</option>`)
+      .join('');
+    html += `
+      <form class="restructure-form">
+        <label>De
+          <select name="source-property">${propOptions}</select>
+        </label>
+        <label>Vers
+          <select name="target-property">${propOptions}</select>
+        </label>
+        <button type="submit" class="btn btn-secondary">Déplacer</button>
+      </form>
+    `;
+  } else if (card.card.type === 'hostile') {
+    const others = state.players.filter(p => p.id !== player.id && !p.bankrupt);
+    const targetOptions = others
+      .flatMap(pl => pl.properties.map(pid => ({ pid, owner: pl.name })))
+      .map(o => `<option value="${o.pid}">${getProp(o.pid)?.name || o.pid} (${o.owner})</option>`)
+      .join('');
+    html += `
+      <form class="hostile-form">
+        <label>Propriété cible
+          <select name="target-property">${targetOptions}</select>
+        </label>
+        <button type="submit" class="btn btn-secondary">Prendre le contrôle</button>
+      </form>
+    `;
+  } else {
+    html += `<button id="apply-card-btn" class="btn btn-secondary">Appliquer l'effet</button>`;
+  }
+
+  html += '</div>';
+  gameControls.innerHTML = html;
+
+  // Event listeners
+  if (card.card.type === 'exchange') {
+    const form = gameControls.querySelector('.exchange-form');
+    const targetPlayerSelect = form.querySelector('[name="target-player"]');
+    const targetPropertySelect = form.querySelector('[name="target-property"]');
+
+    targetPlayerSelect.addEventListener('change', () => {
+      const p = state.players.find(pl => pl.id === targetPlayerSelect.value);
+      const opts = (p?.properties || [])
+        .map(id => `<option value="${id}">${getProp(id)?.name || id}</option>`)
+        .join('');
+      targetPropertySelect.innerHTML = opts;
     });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const params = {
+        selectedPropertyId: parseInt(form.querySelector('[name="selected-property"]').value, 10),
+        targetPlayerId: targetPlayerSelect.value,
+        targetPropertyId: parseInt(targetPropertySelect.value, 10)
+      };
+      applyCardEffect(card.card.id, params);
+    });
+  } else if (card.card.type === 'restructure') {
+    const form = gameControls.querySelector('.restructure-form');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const params = {
+        sourcePropertyId: parseInt(form.querySelector('[name="source-property"]').value, 10),
+        targetPropertyId: parseInt(form.querySelector('[name="target-property"]').value, 10)
+      };
+      applyCardEffect(card.card.id, params);
+    });
+  } else if (card.card.type === 'hostile') {
+    const form = gameControls.querySelector('.hostile-form');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const params = {
+        targetPropertyId: parseInt(form.querySelector('[name="target-property"]').value, 10)
+      };
+      applyCardEffect(card.card.id, params);
+    });
+  } else {
+    const btn = gameControls.querySelector('#apply-card-btn');
+    if (btn) {
+      btn.addEventListener('click', () => applyCardEffect(card.card.id, {}));
+    }
   }
 }
 

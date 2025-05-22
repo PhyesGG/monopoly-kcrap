@@ -49,7 +49,7 @@ function startGame(io, socket, data) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return { success: true };
 }
@@ -83,7 +83,7 @@ function rollDice(io, socket, data) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -135,7 +135,7 @@ function placeBid(io, socket, { amount }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -195,7 +195,7 @@ function passBid(io, socket) {
     });
   }
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return { success: true };
 }
@@ -243,7 +243,7 @@ function activateRevenge(io, socket) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -291,7 +291,7 @@ function declineRevenge(io, socket) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -335,7 +335,7 @@ function createAlliance(io, socket, { targetPlayerId }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -379,7 +379,7 @@ function breakAlliance(io, socket, { unilateral = true }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -431,7 +431,7 @@ function applyCardEffect(io, socket, { cardId, params }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -467,7 +467,7 @@ function buyHouse(io, socket, { propertyId }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -503,7 +503,7 @@ function buyHotel(io, socket, { propertyId }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -539,7 +539,7 @@ function mortgageProperty(io, socket, { propertyId }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }
@@ -575,7 +575,7 @@ function unmortgageProperty(io, socket, { propertyId }) {
     gameState: game.getGameState()
   });
 
-  saveGame(game);
+  saveGame(game, lobby);
 
   return result;
 }

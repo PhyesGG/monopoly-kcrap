@@ -5,6 +5,7 @@ const path = require('path');
 const { PORT } = require('./config');
 const { initSocketHandlers } = require('./socket/handlers');
 const { loadSavedGames } = require('./utils/gamePersistence');
+const { registerLoadedGames } = require('./socket/lobby');
 
 // Configuration du serveur
 
@@ -21,6 +22,7 @@ async function startServer() {
     // Charger les parties sauvegardées
     const saved = loadSavedGames();
     console.log(`Jeux sauvegardés chargés: ${Object.keys(saved).length}`);
+    registerLoadedGames(saved);
 
     // Configuration de Socket.io
     const io = socketIO(server, {

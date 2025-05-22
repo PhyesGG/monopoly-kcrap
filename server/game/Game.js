@@ -20,6 +20,7 @@ class Game {
     this.currentAuction = null;
     this.currentAlliances = [];
     this.digitalDisruptionTurnsLeft = 0;
+    this.lastDiceTotal = 0;
     this.turnCount = 0;
     this.log = [];
   }
@@ -67,6 +68,7 @@ class Game {
     game.state = state.state;
     game.turnCount = state.turnCount;
     game.digitalDisruptionTurnsLeft = state.digitalDisruption ? 1 : 0;
+    game.lastDiceTotal = state.lastDiceTotal || 0;
     game.log = state.log || [];
 
     return game;
@@ -140,7 +142,10 @@ class Game {
         this.state = 'auction';
         actionResult = { type: 'auction', property: currentSquare };
       } else if (currentSquare.owner.id !== this.currentPlayer.id) {
-        const rent = currentSquare.calculateRent();
+        const rent = currentSquare.calculateRent({
+          diceTotal: this.lastDiceTotal,
+          board: this.board
+        });
         const payment = this.currentPlayer.payRent(rent, currentSquare.owner);
 
         if (payment.success && this.digitalDisruptionTurnsLeft > 0) {
@@ -205,6 +210,7 @@ class Game {
 
   handleJailRoll(dice1, dice2, total, doubles) {
     const player = this.currentPlayer;
+    this.lastDiceTotal = total;
     let moveResult = { passedGo: false };
     let currentSquare = this.board.getSquareAt(player.position);
     let actionResult = null;
@@ -273,6 +279,7 @@ class Game {
     const dice1 = Math.floor(Math.random() * 6) + 1;
     const dice2 = Math.floor(Math.random() * 6) + 1;
     const total = dice1 + dice2;
+    this.lastDiceTotal = total;
     const doubles = dice1 === dice2;
 
     this.log.push(`${this.currentPlayer.name} a lancé les dés: ${dice1} et ${dice2} = ${total}`);
@@ -508,6 +515,46 @@ class Game {
     return { success: true };
   }
 
+  hasFullSet(player, group) {
+    const groupProps = this.board.squares.filter(
+      sq => sq.type === 'property' && sq.group === group
+    );
+    return (
+      groupProps.length > 0 &&
+      groupProps.every(p => p.owner && p.owner.id === player.id)
+    );
+  }
+
+  canBuildHouse(player, property) {
+    if (!this.hasFullSet(player, property.group)) return false;
+
+    const groupProps = this.board.squares.filter(
+      sq =>
+        sq.type === 'property' &&
+        sq.group === property.group &&
+        sq.owner &&
+        sq.owner.id === player.id
+    );
+
+    const minHouses = Math.min(...groupProps.map(p => p.houses));
+    return property.houses === minHouses && property.houses < 4 && !property.hotel;
+  }
+
+  canBuildHotel(player, property) {
+    if (!this.hasFullSet(player, property.group)) return false;
+
+    const groupProps = this.board.squares.filter(
+      sq =>
+        sq.type === 'property' &&
+        sq.group === property.group &&
+        sq.owner &&
+        sq.owner.id === player.id
+    );
+
+    if (property.hotel || property.houses !== 4) return false;
+    return groupProps.every(p => p.houses === 4 || p.hotel);
+  }
+
   buyHouse(playerId, propertyId) {
     const player = this.players[playerId];
 
@@ -525,6 +572,10 @@ class Game {
 
     if (!player.canAfford(cost)) {
       return { success: false, message: "Fonds insuffisants." };
+    }
+
+    if (!this.canBuildHouse(player, property)) {
+      return { success: false, message: "Conditions non remplies pour construire." };
     }
 
     if (!property.buyHouse()) {
@@ -554,6 +605,10 @@ class Game {
 
     if (!player.canAfford(cost)) {
       return { success: false, message: "Fonds insuffisants." };
+    }
+
+    if (!this.canBuildHotel(player, property)) {
+      return { success: false, message: "Conditions non remplies pour construire." };
     }
 
     if (!property.buyHotel()) {

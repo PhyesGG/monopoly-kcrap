@@ -92,7 +92,7 @@ describe('Game core methods', () => {
     game.currentPlayer = alice;
     alice.position = 5;
 
-    const rent = property.calculateRent();
+    const rent = property.calculateRent({ board: game.board });
     const expectedBob = bob.money + rent - Math.floor(rent * 0.1);
 
     const result = game.processSquare();
@@ -118,7 +118,7 @@ describe('Game core methods', () => {
     game.currentPlayer = alice;
     alice.position = 36;
 
-    const rent = property.calculateRent();
+    const rent = property.calculateRent({ board: game.board });
     const ownerShare = Math.floor(rent * 0.5);
     const allyShare = rent - ownerShare;
     const expectedBob = bob.money + ownerShare - Math.floor(ownerShare * 0.1);
@@ -128,6 +128,76 @@ describe('Game core methods', () => {
     expect(result.actionResult.type).toBe('rent');
     expect(bob.money).toBe(expectedBob);
     expect(charlie.money).toBe(expectedCharlie);
+  });
+
+  test('railroad rent scales with number owned', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    const bob = game.addPlayer('Bob', 's2');
+    jest.spyOn(global.Math, 'random').mockReturnValue(0);
+    game.startGame();
+    Math.random.mockRestore();
+
+    const r1 = game.board.getSquareAt(14);
+    const r2 = game.board.getSquareAt(24);
+    r1.owner = bob; bob.properties.push(r1);
+    r2.owner = bob; bob.properties.push(r2);
+
+    game.currentPlayer = alice;
+    alice.position = 14;
+
+    const rent = r1.calculateRent({ board: game.board });
+    expect(rent).toBe(50); // 25 * 2 railroads
+
+    const result = game.processSquare();
+    expect(result.actionResult.type).toBe('rent');
+    expect(alice.money).toBe(1500 - rent);
+    expect(bob.money).toBe(1500 + rent);
+  });
+
+  test('utility rent depends on dice roll', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    const bob = game.addPlayer('Bob', 's2');
+    jest.spyOn(global.Math, 'random').mockReturnValue(0);
+    game.startGame();
+    Math.random.mockRestore();
+
+    const util = game.board.getSquareAt(27);
+    util.owner = bob; bob.properties.push(util);
+
+    game.currentPlayer = alice;
+    alice.position = 27;
+    game.lastDiceTotal = 8;
+
+    const rent = util.calculateRent({ diceTotal: 8, board: game.board });
+    expect(rent).toBe(32);
+
+    const result = game.processSquare();
+    expect(result.actionResult.type).toBe('rent');
+    expect(alice.money).toBe(1500 - rent);
+    expect(bob.money).toBe(1500 + rent);
+  });
+
+  test('cannot build house without full set', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    game.addPlayer('Bob', 's2');
+    const prop = game.board.getSquareAt(5);
+    prop.owner = alice; alice.properties.push(prop);
+
+    const res = game.buyHouse(alice.id, prop.id);
+    expect(res.success).toBe(false);
+  });
+
+  test('houses must be built evenly', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    game.addPlayer('Bob', 's2');
+    const p1 = game.board.getSquareAt(5);
+    const p2 = game.board.getSquareAt(6);
+    const p3 = game.board.getSquareAt(8);
+    [p1, p2, p3].forEach(p => { p.owner = alice; alice.properties.push(p); });
+
+    expect(game.buyHouse(alice.id, p1.id).success).toBe(true);
+    const second = game.buyHouse(alice.id, p1.id);
+    expect(second.success).toBe(false); // doit construire sur autres cases avant
   });
 
   test('save and load game state', () => {

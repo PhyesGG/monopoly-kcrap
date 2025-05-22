@@ -95,6 +95,23 @@ class Game {
         const rent = currentSquare.calculateRent();
         const payment = this.currentPlayer.payRent(rent, currentSquare.owner);
 
+        if (payment.success && this.digitalDisruptionTurnsLeft > 0) {
+          if (payment.split) {
+            const ownerShare = Math.floor(rent * 0.5);
+            const allyShare = rent - ownerShare;
+            const ownerTax = Math.floor(ownerShare * 0.1);
+            const allyTax = Math.floor(allyShare * 0.1);
+            currentSquare.owner.money -= ownerTax;
+            const allyPlayer = this.players[payment.ally];
+            if (allyPlayer) {
+              allyPlayer.money -= allyTax;
+            }
+          } else {
+            const tax = Math.floor(rent * 0.1);
+            currentSquare.owner.money -= tax;
+          }
+        }
+
         if (!payment.success) {
           if (this.currentPlayer.revengeToken && !this.currentPlayer.revengeActive) {
             this.state = 'revenge';

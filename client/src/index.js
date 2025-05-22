@@ -20,6 +20,7 @@ import {
 } from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
+import { initBoard } from './components/Board.js';
 
 // Initialiser la connexion socket
 document.addEventListener('DOMContentLoaded', () => {
@@ -402,7 +403,7 @@ function showGameScreen(gameState) {
   `;
   
   // Initialiser le plateau et les contrôles
-  renderBoard(gameState.board);
+  renderBoard(gameState.board, gameState.players);
   renderPlayersInfo(gameState.players);
   updateGameLog(gameState.log);
   
@@ -417,7 +418,9 @@ function showGameScreen(gameState) {
 // Fonction pour mettre à jour l'écran de jeu
 function updateGameScreen(gameState) {
   if (!gameState) return;
-  
+
+  renderBoard(gameState.board, gameState.players);
+
   renderPlayersInfo(gameState.players);
   updateGameLog(gameState.log);
   
@@ -586,15 +589,45 @@ function handleAllianceUI(alliance) {
 }
 
 // Fonctions de rendu du jeu
-function renderBoard(board) {
-  // Implémentation simplifiée pour démarrer
+function renderBoard(board, players = []) {
   const boardElement = document.getElementById('board');
-  boardElement.innerHTML = `
-    <div class="board-placeholder">
-      <i class="fas fa-dice-five"></i>
-      <p>Plateau de jeu (en développement)</p>
-    </div>
-  `;
+  if (!boardElement) return;
+
+  boardElement.innerHTML = '';
+  boardElement.style.display = 'grid';
+  boardElement.style.gridTemplateColumns = 'repeat(10, 1fr)';
+  boardElement.style.gap = '4px';
+
+  board.forEach(square => {
+    const el = document.createElement('div');
+    el.className = `board-square ${square.type}`;
+    el.dataset.id = square.id;
+    el.innerHTML = `<div class="square-name">${square.name}</div><div class="tokens"></div>`;
+    el.style.minHeight = '60px';
+    el.style.border = '1px solid rgba(0,0,0,0.2)';
+    el.style.padding = '2px';
+    boardElement.appendChild(el);
+  });
+
+  players.forEach(player => {
+    const tokenContainer = boardElement.querySelector(`.board-square[data-id="${player.position}"] .tokens`);
+    if (tokenContainer) {
+      const token = document.createElement('span');
+      token.className = 'player-token';
+      token.textContent = player.name.charAt(0).toUpperCase();
+      token.style.display = 'inline-block';
+      token.style.width = '20px';
+      token.style.height = '20px';
+      token.style.borderRadius = '50%';
+      token.style.background = '#FF00A8';
+      token.style.color = '#000';
+      token.style.fontSize = '0.75rem';
+      token.style.lineHeight = '20px';
+      token.style.textAlign = 'center';
+      token.style.marginRight = '2px';
+      tokenContainer.appendChild(token);
+    }
+  });
 }
 
 function renderPlayersInfo(players) {

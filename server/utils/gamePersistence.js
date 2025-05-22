@@ -9,11 +9,24 @@ function ensureSaveDir() {
   }
 }
 
-function saveGame(game) {
+function saveGame(game, lobby = null) {
   try {
     ensureSaveDir();
     const file = path.join(SAVE_PATH, `${game.id}.json`);
-    fs.writeFileSync(file, JSON.stringify(game.getGameState(), null, 2));
+
+    const data = { game: game.getGameState() };
+
+    if (lobby) {
+      data.lobby = {
+        id: lobby.id,
+        name: lobby.name,
+        host: lobby.host,
+        createdAt: lobby.createdAt,
+        players: lobby.players
+      };
+    }
+
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
   } catch (err) {
     console.error('Erreur lors de la sauvegarde du jeu:', err);
   }
@@ -25,7 +38,12 @@ function loadGame(gameId) {
     const file = path.join(SAVE_PATH, `${gameId}.json`);
     if (!fs.existsSync(file)) return null;
     const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-    return Game.fromState(data);
+
+    const gameState = data.game || data;
+    const game = Game.fromState(gameState);
+    const lobby = data.lobby || null;
+
+    return { game, lobby };
   } catch (err) {
     console.error('Erreur lors du chargement du jeu:', err);
     return null;

@@ -293,8 +293,27 @@ function generateLobbyId() {
   do {
     id = Math.random().toString(36).substring(2, 8).toUpperCase();
   } while (lobbies[id]);
-  
+
   return id;
+}
+
+function registerLoadedGames(savedGames) {
+  for (const gameId of Object.keys(savedGames)) {
+    const { game, lobby: lobbyData } = savedGames[gameId];
+    if (!game || !lobbyData) continue;
+
+    lobbies[lobbyData.id] = {
+      id: lobbyData.id,
+      name: lobbyData.name || `Restored ${lobbyData.id}`,
+      host: lobbyData.host,
+      players: lobbyData.players.map(p => ({
+        ...p,
+        connected: false
+      })),
+      game,
+      createdAt: lobbyData.createdAt || Date.now()
+    };
+  }
 }
 
 module.exports = {
@@ -306,5 +325,6 @@ module.exports = {
   getLobbyBySocketId,
   getLobbyById,
   handleDisconnect,
-  lobbies
+  lobbies,
+  registerLoadedGames
 };

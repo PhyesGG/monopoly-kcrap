@@ -233,8 +233,8 @@ describe('Game core methods', () => {
     saveGame(game);
     const loaded = loadGame(game.id);
     expect(loaded).not.toBeNull();
-    expect(Object.keys(loaded.players)).toHaveLength(2);
-    expect(loaded.digitalDisruptionTurnsLeft).toBe(2);
+    expect(Object.keys(loaded.game.players)).toHaveLength(2);
+    expect(loaded.game.digitalDisruptionTurnsLeft).toBe(2);
 
     fs.unlinkSync(path.join(SAVE_PATH, `${game.id}.json`));
   });

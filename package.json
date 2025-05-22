@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
-    "client": "webpack serve --mode development",
-    "build": "webpack --mode production",
+    "client": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js --mode development",
+    "build": "node node_modules/webpack/bin/webpack.js --mode production",
     "dev:all": "concurrently \"npm run dev\" \"npm run client\"",
     "test": "jest"
   },

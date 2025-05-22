@@ -21,6 +21,24 @@ Pour un démarrage simple (sans nodemon) :
 npm start
 ```
 
+## Variables d'environnement
+
+Le serveur peut être configuré via un fichier `.env` placé à la racine du projet.
+Un exemple est fourni dans `.env.example` :
+
+```env
+PORT=3000
+SAVE_PATH=./saves
+```
+
+Un script de démarrage est fourni dans `scripts/start.sh` pour lancer
+l'application en production :
+
+```bash
+./scripts/start.sh
+```
+
+
 ## Démarrer le client
 
 Le client Webpack peut être lancé séparément :
@@ -38,6 +56,21 @@ npm run dev:all
 Les tests Jest se trouvent dans le dossier `tests/` :
 ```bash
 npm test
+```
+
+## Déploiement avec Docker
+
+Une configuration Docker est disponible pour faciliter la mise en production.
+Construisez l'image :
+
+```bash
+docker build -t monopoly-kcrap .
+```
+
+Lancez le conteneur en précisant éventuellement les variables d'environnement :
+
+```bash
+docker run -p 3000:3000 --env-file .env monopoly-kcrap
 ```
 
 ### Sauvegarde et reconnexion

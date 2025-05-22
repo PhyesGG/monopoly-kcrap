@@ -2,12 +2,12 @@ const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
-const { findAvailablePort } = require('./utils/portFinder');
+const { PORT } = require('./config');
 const { initSocketHandlers } = require('./socket/handlers');
 const { loadSavedGames } = require('./utils/gamePersistence');
 
 // Configuration du serveur
-const DEFAULT_PORT = 3000;
+
 
 async function startServer() {
   try {
@@ -15,8 +15,8 @@ async function startServer() {
     const app = express();
     const server = http.createServer(app);
     
-    // Trouver un port disponible
-    const port = await findAvailablePort(DEFAULT_PORT);
+    // Utiliser le port défini dans la configuration
+    const port = PORT;
     
     // Charger les parties sauvegardées
     const saved = loadSavedGames();

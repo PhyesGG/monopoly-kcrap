@@ -91,13 +91,138 @@ class Board {
       position: 12
     });
 
-    // Compléter le reste des cases avec des emplacements génériques
-    for (let i = 13; i < 40; i++) {
-      const prop = new Property(i, `Propriété ${i}`, 100 + (i - 13) * 10, 'extra');
-      prop.type = 'property';
-      prop.position = i;
-      squares.push(prop);
-    }
+    // Reste du plateau classique
+    const p8 = new Property(13, 'Rue de Paradis', 160, 'pink');
+    p8.position = 13;
+    squares.push(p8);
+
+    const r2 = new Property(14, 'Gare de Lyon', 200, 'railroad');
+    r2.position = 14;
+    squares.push(r2);
+
+    const o1 = new Property(15, 'Avenue Mozart', 180, 'orange');
+    o1.position = 15;
+    squares.push(o1);
+
+    squares.push({
+      id: 16,
+      type: 'card',
+      name: 'Caisse de Communauté',
+      position: 16
+    });
+
+    const o2 = new Property(17, 'Boulevard Saint-Michel', 180, 'orange');
+    o2.position = 17;
+    squares.push(o2);
+
+    const o3 = new Property(18, 'Place Pigalle', 200, 'orange');
+    o3.position = 18;
+    squares.push(o3);
+
+    squares.push({
+      id: 19,
+      type: 'parking',
+      name: 'Parc Gratuit',
+      position: 19
+    });
+
+    const r3 = new Property(20, 'Avenue Matignon', 220, 'red');
+    r3.position = 20;
+    squares.push(r3);
+
+    squares.push({
+      id: 21,
+      type: 'card',
+      name: 'Chance',
+      position: 21
+    });
+
+    const r4 = new Property(22, 'Boulevard Malesherbes', 220, 'red');
+    r4.position = 22;
+    squares.push(r4);
+
+    const r5 = new Property(23, 'Avenue Henri-Martin', 240, 'red');
+    r5.position = 23;
+    squares.push(r5);
+
+    const rr3 = new Property(24, 'Gare du Nord', 200, 'railroad');
+    rr3.position = 24;
+    squares.push(rr3);
+
+    const y1 = new Property(25, 'Faubourg Saint-Honoré', 260, 'yellow');
+    y1.position = 25;
+    squares.push(y1);
+
+    const y2 = new Property(26, 'Place de la Bourse', 260, 'yellow');
+    y2.position = 26;
+    squares.push(y2);
+
+    const util2 = new Property(27, 'Compagnie des Eaux', 150, 'utility');
+    util2.position = 27;
+    squares.push(util2);
+
+    const y3 = new Property(28, 'Rue La Fayette', 280, 'yellow');
+    y3.position = 28;
+    squares.push(y3);
+
+    squares.push({
+      id: 29,
+      type: 'goto-jail',
+      name: 'Allez en Prison',
+      position: 29
+    });
+
+    const g1 = new Property(30, 'Avenue de Breteuil', 300, 'green');
+    g1.position = 30;
+    squares.push(g1);
+
+    const g2 = new Property(31, 'Avenue Foch', 300, 'green');
+    g2.position = 31;
+    squares.push(g2);
+
+    squares.push({
+      id: 32,
+      type: 'card',
+      name: 'Caisse de Communauté',
+      position: 32
+    });
+
+    const g3 = new Property(33, 'Boulevard des Capucines', 320, 'green');
+    g3.position = 33;
+    squares.push(g3);
+
+    const rr4 = new Property(34, 'Gare Saint-Lazare', 200, 'railroad');
+    rr4.position = 34;
+    squares.push(rr4);
+
+    squares.push({
+      id: 35,
+      type: 'card',
+      name: 'Chance',
+      position: 35
+    });
+
+    const b1 = new Property(36, 'Avenue des Champs-Élysées', 350, 'dark-blue');
+    b1.position = 36;
+    squares.push(b1);
+
+    squares.push({
+      id: 37,
+      type: 'tax',
+      name: 'Taxe de Luxe',
+      position: 37,
+      amount: 100
+    });
+    const b2 = new Property(38, 'Rue de la Paix', 400, 'dark-blue');
+    b2.position = 38;
+    squares.push(b2);
+
+    squares.push({
+      id: 39,
+      type: 'go',
+      name: 'Passage',
+      position: 39
+    });
 
     return squares;
   }

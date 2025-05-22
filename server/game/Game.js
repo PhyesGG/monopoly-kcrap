@@ -680,6 +680,24 @@ class Game {
     return true;
   }
 
+  updateTemporaryEffects() {
+    this.board.squares.forEach(square => {
+      if (square.type === 'property') {
+        if (typeof square.cryptoTurnsLeft === 'number') {
+          square.cryptoTurnsLeft--;
+          if (square.cryptoTurnsLeft <= 0) {
+            delete square.cryptoTurnsLeft;
+            delete square.cryptoFluctuation;
+          }
+        }
+
+        if (square.updateTemporaryOwnership()) {
+          this.log.push(`${square.name} retourne à ${square.owner.name}`);
+        }
+      }
+    });
+  }
+
   applyCardEffect(playerId, cardId, params) {
     if (this.state !== 'card') {
       return { 
@@ -787,11 +805,14 @@ class Game {
     // Mise à jour de la perturbation numérique
     if (this.digitalDisruptionTurnsLeft > 0) {
       this.digitalDisruptionTurnsLeft--;
-      
+
       if (this.digitalDisruptionTurnsLeft === 0) {
         this.log.push("La perturbation numérique s'est terminée");
       }
     }
+
+    // Mise à jour des effets temporaires des propriétés
+    this.updateTemporaryEffects();
     
     // Passer au joueur suivant
     do {

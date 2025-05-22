@@ -67,7 +67,8 @@ class Game {
     game.currentPlayer = game.players[state.currentPlayer] || null;
     game.state = state.state;
     game.turnCount = state.turnCount;
-    game.digitalDisruptionTurnsLeft = state.digitalDisruption ? 1 : 0;
+    game.digitalDisruptionTurnsLeft = state.digitalDisruptionTurnsLeft ||
+      (state.digitalDisruption ? 1 : 0);
     game.lastDiceTotal = state.lastDiceTotal || 0;
     game.log = state.log || [];
 
@@ -889,6 +890,7 @@ class Game {
       turnCount: this.turnCount,
       board: this.board.getState(),
       digitalDisruption: this.digitalDisruptionTurnsLeft > 0,
+      digitalDisruptionTurnsLeft: this.digitalDisruptionTurnsLeft,
       log: this.log.slice(-20) // Derniers 20 événements du log
     };
   }

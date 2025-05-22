@@ -77,4 +77,56 @@ describe('Game core methods', () => {
     expect(game.currentPlayer.id).not.toBe(first);
     expect(next.id).toBe(game.currentPlayer.id);
   });
+
+  test('digital disruption applies 10% tax on rent', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    const bob = game.addPlayer('Bob', 's2');
+    jest.spyOn(global.Math, 'random').mockReturnValue(0);
+    game.startGame();
+    Math.random.mockRestore();
+
+    const property = game.board.getSquareAt(5); // price 100 => rent 10
+    property.owner = bob;
+    game.applyDigitalDisruption(2);
+
+    game.currentPlayer = alice;
+    alice.position = 5;
+
+    const rent = property.calculateRent();
+    const expectedBob = bob.money + rent - Math.floor(rent * 0.1);
+
+    const result = game.processSquare();
+    expect(result.actionResult.type).toBe('rent');
+    expect(alice.money).toBe(1500 - rent);
+    expect(bob.money).toBe(expectedBob);
+  });
+
+  test('digital disruption taxes split rent in alliance', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    const bob = game.addPlayer('Bob', 's2');
+    const charlie = game.addPlayer('Charlie', 's3');
+    jest.spyOn(global.Math, 'random').mockReturnValue(0);
+    game.startGame();
+    Math.random.mockRestore();
+
+    game.createAlliance(bob.id, charlie.id);
+
+    const property = game.board.getSquareAt(36); // price 350 => rent 35
+    property.owner = bob;
+    game.applyDigitalDisruption(2);
+
+    game.currentPlayer = alice;
+    alice.position = 36;
+
+    const rent = property.calculateRent();
+    const ownerShare = Math.floor(rent * 0.5);
+    const allyShare = rent - ownerShare;
+    const expectedBob = bob.money + ownerShare - Math.floor(ownerShare * 0.1);
+    const expectedCharlie = charlie.money + allyShare - Math.floor(allyShare * 0.1);
+
+    const result = game.processSquare();
+    expect(result.actionResult.type).toBe('rent');
+    expect(bob.money).toBe(expectedBob);
+    expect(charlie.money).toBe(expectedCharlie);
+  });
 });

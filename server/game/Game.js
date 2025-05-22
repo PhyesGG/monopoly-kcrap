@@ -24,6 +24,54 @@ class Game {
     this.log = [];
   }
 
+  static fromState(state) {
+    const game = new Game();
+    game.id = state.id;
+
+    // Reconstruire les joueurs
+    game.players = {};
+    state.players.forEach(pData => {
+      const player = new Player(pData.name, null);
+      player.id = pData.id;
+      player.money = pData.money;
+      player.position = pData.position;
+      player.inJail = pData.inJail;
+      player.jailTurns = pData.jailTurns;
+      player.turnsInJail = pData.turnsInJail;
+      player.jailCards = pData.jailCards;
+      player.totalJailPayments = pData.jailPaid;
+      player.bankrupt = pData.bankrupt;
+      player.revengeToken = pData.revengeToken;
+      player.revengeActive = pData.revengeActive;
+      game.players[player.id] = player;
+    });
+
+    // Reconstruire le plateau
+    game.board = new Board();
+    state.board.forEach(sq => {
+      const boardSq = game.board.getSquareAt(sq.position);
+      if (boardSq && boardSq.type === 'property') {
+        boardSq.houses = sq.houses || 0;
+        boardSq.hotel = sq.hotel || false;
+        boardSq.mortgaged = sq.mortgaged || false;
+        if (sq.ownerId && game.players[sq.ownerId]) {
+          boardSq.owner = game.players[sq.ownerId];
+          game.players[sq.ownerId].properties.push(boardSq);
+        }
+      }
+    });
+
+    game.playerOrder = state.players.map(p => p.id);
+    game.currentPlayerIndex = game.playerOrder.indexOf(state.currentPlayer);
+    game.currentPlayer = game.players[state.currentPlayer] || null;
+    game.state = state.state;
+    game.turnCount = state.turnCount;
+    game.digitalDisruptionTurnsLeft = state.digitalDisruption ? 1 : 0;
+    game.log = state.log || [];
+
+    return game;
+  }
+
   addPlayer(name, socketId) {
     const player = new Player(name, socketId);
     this.players[player.id] = player;

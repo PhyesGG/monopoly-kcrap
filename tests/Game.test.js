@@ -129,4 +129,24 @@ describe('Game core methods', () => {
     expect(bob.money).toBe(expectedBob);
     expect(charlie.money).toBe(expectedCharlie);
   });
+
+  test('save and load game state', () => {
+    const p1 = game.addPlayer('Alice', 's1');
+    const p2 = game.addPlayer('Bob', 's2');
+    jest.spyOn(global.Math, 'random').mockReturnValue(0);
+    game.startGame();
+    Math.random.mockRestore();
+
+    const { saveGame, loadGame } = require('../server/utils/gamePersistence');
+    const { SAVE_PATH } = require('../server/config');
+    const fs = require('fs');
+    const path = require('path');
+
+    saveGame(game);
+    const loaded = loadGame(game.id);
+    expect(loaded).not.toBeNull();
+    expect(Object.keys(loaded.players)).toHaveLength(2);
+
+    fs.unlinkSync(path.join(SAVE_PATH, `${game.id}.json`));
+  });
 });

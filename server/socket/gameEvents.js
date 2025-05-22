@@ -1,5 +1,6 @@
 const Game = require('../game/Game');
 const { getLobbyBySocketId, getLobbyById } = require('./lobby');
+const { saveGame } = require('../utils/gamePersistence');
 
 function startGame(io, socket, data) {
   const lobby = getLobbyBySocketId(socket.id);
@@ -47,7 +48,9 @@ function startGame(io, socket, data) {
   io.of('/game').to(lobby.id).emit('game_started', {
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return { success: true };
 }
 
@@ -79,7 +82,9 @@ function rollDice(io, socket, data) {
     result,
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return result;
 }
 
@@ -129,7 +134,9 @@ function placeBid(io, socket, { amount }) {
     message: result.message,
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return result;
 }
 
@@ -174,7 +181,7 @@ function passBid(io, socket) {
   if (roundResult.ended) {
     // Si l'enchère est terminée, finaliser
     const auctionResult = game.finalizeAuction();
-    
+
     io.of('/game').to(lobby.id).emit('auction_ended', {
       result: auctionResult,
       gameState: game.getGameState()
@@ -187,7 +194,9 @@ function passBid(io, socket) {
       gameState: game.getGameState()
     });
   }
-  
+
+  saveGame(game);
+
   return { success: true };
 }
 
@@ -233,7 +242,9 @@ function activateRevenge(io, socket) {
     message: result.message,
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return result;
 }
 
@@ -279,7 +290,9 @@ function declineRevenge(io, socket) {
     message: result.message,
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return result;
 }
 
@@ -321,7 +334,9 @@ function createAlliance(io, socket, { targetPlayerId }) {
     message: result.message,
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return result;
 }
 
@@ -363,7 +378,9 @@ function breakAlliance(io, socket, { unilateral = true }) {
     message: result.message,
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return result;
 }
 
@@ -413,7 +430,9 @@ function applyCardEffect(io, socket, { cardId, params }) {
     message: result.message,
     gameState: game.getGameState()
   });
-  
+
+  saveGame(game);
+
   return result;
 }
 
@@ -447,6 +466,8 @@ function buyHouse(io, socket, { propertyId }) {
     message: result.message,
     gameState: game.getGameState()
   });
+
+  saveGame(game);
 
   return result;
 }
@@ -482,6 +503,8 @@ function buyHotel(io, socket, { propertyId }) {
     gameState: game.getGameState()
   });
 
+  saveGame(game);
+
   return result;
 }
 
@@ -516,6 +539,8 @@ function mortgageProperty(io, socket, { propertyId }) {
     gameState: game.getGameState()
   });
 
+  saveGame(game);
+
   return result;
 }
 
@@ -549,6 +574,8 @@ function unmortgageProperty(io, socket, { propertyId }) {
     message: result.message,
     gameState: game.getGameState()
   });
+
+  saveGame(game);
 
   return result;
 }

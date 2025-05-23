@@ -8,6 +8,12 @@ const lobbies = {};
 // socket.id -> { lobbyId, token }
 const playerConnections = {};
 
+// Vérifier qu'un socket possède bien le jeton fourni
+function validateToken(socket, token) {
+  const conn = playerConnections[socket.id];
+  return !!(conn && conn.token && token && conn.token === token);
+}
+
 function createLobby(socket, { playerName, lobbyName }) {
   console.log('Demande de création de lobby:', { playerName, lobbyName, socketId: socket.id });
 
@@ -326,5 +332,6 @@ module.exports = {
   getLobbyById,
   handleDisconnect,
   lobbies,
-  registerLoadedGames
+  registerLoadedGames,
+  validateToken
 };

@@ -36,6 +36,9 @@ export function initBoard(target = 'board', infoTarget = null) {
       if (currentPlayer && square.id === currentPlayer.position) {
         classes += ' active-square';
       }
+      if (currentPlayer && square.ownerId === currentPlayer.id) {
+        classes += ' owned-square';
+      }
       if (square.mortgaged) classes += ' mortgaged';
       el.className = classes;
       el.dataset.id = square.id;

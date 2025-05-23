@@ -24,12 +24,18 @@ npm start
 ## Variables d'environnement
 
 Le serveur peut être configuré via un fichier `.env` placé à la racine du projet.
-Un exemple est fourni dans `.env.example` :
+Copiez le fichier d'exemple `.env.example` sous le nom `.env` puis ajustez les valeurs :
 
 ```env
 PORT=3000
 SAVE_PATH=./saves
 ```
+
+* `PORT` : port d'écoute du serveur HTTP.
+* `SAVE_PATH` : répertoire où seront stockées les sauvegardes de partie (créé automatiquement au démarrage).
+
+Ce fichier est chargé automatiquement par le serveur. Lors d'un déploiement Docker,
+vous pouvez passer ces valeurs avec `--env-file .env`.
 
 Un script de démarrage est fourni dans `scripts/start.sh` pour lancer
 l'application en production :
@@ -85,9 +91,23 @@ l'écran de jeu est restauré.
 ### Persistance du pseudonyme
 
 Le client mémorise désormais le dernier nom de joueur saisi dans `localStorage`.
+
 Lorsque la page d'accueil est affichée, ce pseudonyme est automatiquement
 prérempli dans les champs "Votre nom". Ainsi, il n'est plus nécessaire de le
 renseigner à chaque nouvelle connexion.
+
+### Résumé du mode KCRAP
+
+Lorsque qu'un joueur s'arrête sur la case « KCRAP », il pioche une carte spéciale pouvant déclencher l'un des effets suivants :
+
+- **Bourse Crypto** : fluctuation temporaire du prix de vente de ses propriétés.
+- **Échange forcé** : échange de propriétés avec un adversaire si leurs valeurs sont proches.
+- **Restructuration** : déplacement d'une maison d'une propriété du joueur vers une autre.
+- **Fusion hostile** : prise de contrôle temporaire d'une propriété adverse non améliorée.
+- **Perturbation numérique** : taxation de 10 % des loyers pendant deux tours.
+- **Aller en prison** : le joueur est immédiatement envoyé en prison.
+
+Ces cartes ajoutent une dimension stratégique supplémentaire. Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour la description complète de chaque règle.
 
 ## Guide d'utilisation avancée
 

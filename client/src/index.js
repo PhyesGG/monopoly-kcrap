@@ -516,6 +516,12 @@ function updateUIState(uiState) {
         <div class="dice-total">${uiState.diceResult.total}</div>
       </div>
     `;
+    diceResultElement.querySelectorAll('.dice').forEach(el => {
+      el.classList.add('roll-anim');
+      el.addEventListener('animationend', () => {
+        el.classList.remove('roll-anim');
+      }, { once: true });
+    });
   }
   
   // Gérer les enchères
@@ -840,6 +846,10 @@ function renderBoard(board, players = [], currentPlayerId = null, infoTarget = n
       token.style.lineHeight = '20px';
       token.style.textAlign = 'center';
       token.style.marginRight = '2px';
+      token.classList.add('move-anim');
+      token.addEventListener('animationend', () => {
+        token.classList.remove('move-anim');
+      }, { once: true });
       tokenContainer.appendChild(token);
     }
   });

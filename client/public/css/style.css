@@ -1070,6 +1070,22 @@ body::before {
   font-size: 0.9rem;
 }
 
+.money-bar-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+}
+
+.money-bar {
+  height: 100%;
+  background: var(--secondary-color);
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
 .player-special {
   font-size: 0.8rem;
   color: rgba(224, 251, 252, 0.7);

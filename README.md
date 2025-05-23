@@ -98,16 +98,22 @@ renseigner à chaque nouvelle connexion.
 
 ### Résumé du mode KCRAP
 
-Lorsque qu'un joueur s'arrête sur la case « KCRAP », il pioche une carte spéciale pouvant déclencher l'un des effets suivants :
+Le mode KCRAP ajoute plusieurs mécaniques innovantes :
 
-- **Bourse Crypto** : fluctuation temporaire du prix de vente de ses propriétés.
-- **Échange forcé** : échange de propriétés avec un adversaire si leurs valeurs sont proches.
-- **Restructuration** : déplacement d'une maison d'une propriété du joueur vers une autre.
-- **Fusion hostile** : prise de contrôle temporaire d'une propriété adverse non améliorée.
-- **Perturbation numérique** : taxation de 10 % des loyers pendant deux tours.
-- **Aller en prison** : le joueur est immédiatement envoyé en prison.
+* **Enchères modernes** : chaque propriété libre fait l'objet d'une enchère démarrant à 50 % de son prix et dont le montant décroît si personne n'enchérit.
+* **Alliances temporaires** : deux joueurs peuvent s'allier pour trois tours et se partager 50 % des loyers, avec une pénalité de 200 € en cas de rupture unilatérale.
+* **Jeton de revanche** : en cas de quasi-faillite, un joueur peut recevoir 500 € et doit rembourser 750 € sous cinq tours.
 
-Ces cartes ajoutent une dimension stratégique supplémentaire. Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour la description complète de chaque règle.
+Lorsqu'un joueur s'arrête sur la case « KCRAP », il pioche en outre une carte spéciale pouvant déclencher l'un des effets suivants :
+
+* **Bourse Crypto** : fluctuation temporaire du prix de vente de ses propriétés.
+* **Échange forcé** : échange de propriétés avec un adversaire si leurs valeurs sont proches.
+* **Restructuration** : déplacement d'une maison d'une propriété du joueur vers une autre.
+* **Fusion hostile** : prise de contrôle temporaire d'une propriété adverse non améliorée.
+* **Perturbation numérique** : taxation de 10 % des loyers pendant deux tours.
+* **Aller en prison** : le joueur est immédiatement envoyé en prison.
+
+Ces cartes et ces mécaniques renforcent l'aspect stratégique du jeu. Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour la description complète de chaque règle.
 
 ## Guide d'utilisation avancée
 

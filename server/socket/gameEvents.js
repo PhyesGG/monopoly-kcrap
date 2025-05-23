@@ -1,8 +1,23 @@
 const Game = require('../game/Game');
-const { getLobbyBySocketId, getLobbyById, leaveLobby } = require('./lobby');
+const {
+  getLobbyBySocketId,
+  getLobbyById,
+  leaveLobby,
+  validateToken
+} = require('./lobby');
 const { saveGame } = require('../utils/gamePersistence');
 
-function startGame(io, socket, data) {
+function checkAuth(socket, token) {
+  if (token !== undefined && !validateToken(socket, token)) {
+    return { success: false, message: 'Authentification invalide' };
+  }
+  return null;
+}
+
+function startGame(io, socket, data = {}) {
+  const auth = checkAuth(socket, data.token);
+  if (auth) return auth;
+
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby) {
@@ -54,7 +69,10 @@ function startGame(io, socket, data) {
   return { success: true };
 }
 
-function rollDice(io, socket, data) {
+function rollDice(io, socket, data = {}) {
+  const auth = checkAuth(socket, data.token);
+  if (auth) return auth;
+
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {
@@ -88,7 +106,11 @@ function rollDice(io, socket, data) {
   return result;
 }
 
-function placeBid(io, socket, { amount }) {
+function placeBid(io, socket, data = {}) {
+  const { amount, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof amount !== 'number' || amount <= 0) {
     return { success: false, message: 'Montant invalide' };
   }
@@ -140,7 +162,10 @@ function placeBid(io, socket, { amount }) {
   return result;
 }
 
-function passBid(io, socket) {
+function passBid(io, socket, data = {}) {
+  const auth = checkAuth(socket, data.token);
+  if (auth) return auth;
+
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {
@@ -200,7 +225,10 @@ function passBid(io, socket) {
   return { success: true };
 }
 
-function activateRevenge(io, socket) {
+function activateRevenge(io, socket, data = {}) {
+  const auth = checkAuth(socket, data.token);
+  if (auth) return auth;
+
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {
@@ -248,7 +276,10 @@ function activateRevenge(io, socket) {
   return result;
 }
 
-function declineRevenge(io, socket) {
+function declineRevenge(io, socket, data = {}) {
+  const auth = checkAuth(socket, data.token);
+  if (auth) return auth;
+
   const lobby = getLobbyBySocketId(socket.id);
   
   if (!lobby || !lobby.game) {
@@ -296,7 +327,11 @@ function declineRevenge(io, socket) {
   return result;
 }
 
-function createAlliance(io, socket, { targetPlayerId }) {
+function createAlliance(io, socket, data = {}) {
+  const { targetPlayerId, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof targetPlayerId !== 'string' || targetPlayerId.trim() === '') {
     return { success: false, message: 'ID de joueur cible requis' };
   }
@@ -340,7 +375,11 @@ function createAlliance(io, socket, { targetPlayerId }) {
   return result;
 }
 
-function breakAlliance(io, socket, { unilateral = true }) {
+function breakAlliance(io, socket, data = {}) {
+  const { unilateral = true, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof unilateral !== 'boolean') {
     return { success: false, message: 'Paramètre invalide' };
   }
@@ -384,7 +423,11 @@ function breakAlliance(io, socket, { unilateral = true }) {
   return result;
 }
 
-function applyCardEffect(io, socket, { cardId, params }) {
+function applyCardEffect(io, socket, data = {}) {
+  const { cardId, params, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof cardId !== 'string' || cardId.trim() === '') {
     return { success: false, message: 'Carte invalide' };
   }
@@ -436,7 +479,11 @@ function applyCardEffect(io, socket, { cardId, params }) {
   return result;
 }
 
-function buyHouse(io, socket, { propertyId }) {
+function buyHouse(io, socket, data = {}) {
+  const { propertyId, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof propertyId !== 'number') {
     return { success: false, message: 'Propriété invalide' };
   }
@@ -472,7 +519,11 @@ function buyHouse(io, socket, { propertyId }) {
   return result;
 }
 
-function buyHotel(io, socket, { propertyId }) {
+function buyHotel(io, socket, data = {}) {
+  const { propertyId, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof propertyId !== 'number') {
     return { success: false, message: 'Propriété invalide' };
   }
@@ -508,7 +559,11 @@ function buyHotel(io, socket, { propertyId }) {
   return result;
 }
 
-function mortgageProperty(io, socket, { propertyId }) {
+function mortgageProperty(io, socket, data = {}) {
+  const { propertyId, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof propertyId !== 'number') {
     return { success: false, message: 'Propriété invalide' };
   }
@@ -544,7 +599,11 @@ function mortgageProperty(io, socket, { propertyId }) {
   return result;
 }
 
-function unmortgageProperty(io, socket, { propertyId }) {
+function unmortgageProperty(io, socket, data = {}) {
+  const { propertyId, token } = data;
+  const auth = checkAuth(socket, token);
+  if (auth) return auth;
+
   if (typeof propertyId !== 'number') {
     return { success: false, message: 'Propriété invalide' };
   }
@@ -580,7 +639,10 @@ function unmortgageProperty(io, socket, { propertyId }) {
   return result;
 }
 
-function quitGame(io, socket) {
+function quitGame(io, socket, data = {}) {
+  const auth = checkAuth(socket, data.token);
+  if (auth) return auth;
+
   const lobby = getLobbyBySocketId(socket.id);
 
   if (!lobby || !lobby.game) {

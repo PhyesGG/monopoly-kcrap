@@ -96,6 +96,15 @@ Lorsque la page d'accueil est affichée, ce pseudonyme est automatiquement
 prérempli dans les champs "Votre nom". Ainsi, il n'est plus nécessaire de le
 renseigner à chaque nouvelle connexion.
 
+### Liens directs vers les salons
+
+Il est possible d'accéder directement à un salon via l'URL `http://<hôte>:<port>/ID_SALON`.
+Au chargement, le client détecte cet identifiant et tente de rejoindre
+automatiquement le salon avec le pseudonyme enregistré ou préremplit le champ
+"Code du salon".
+Dans l'écran du lobby, le code d'invitation apparaît comme un lien menant à
+`/ID_SALON` afin de pouvoir le partager facilement.
+
 ### Résumé du mode KCRAP
 
 Lorsque qu'un joueur s'arrête sur la case « KCRAP », il pioche une carte spéciale pouvant déclencher l'un des effets suivants :

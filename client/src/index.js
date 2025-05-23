@@ -17,7 +17,8 @@ import {
   buyHotel,
   mortgageProperty,
   unmortgageProperty,
-  reconnectPlayer
+  reconnectPlayer,
+  quitGame
 } from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
@@ -388,6 +389,20 @@ async function handleLeaveLobby() {
   }
 }
 
+// Quitter la partie en cours
+async function handleQuitGame() {
+  try {
+    console.log('Tentative de quitter la partie');
+    await quitGame();
+    console.log('Partie quittée');
+    clearPlayerState();
+    renderHomePage();
+  } catch (error) {
+    console.error('Erreur lors de la sortie de la partie:', error);
+    alert(`Erreur: ${error.message}`);
+  }
+}
+
 async function attemptAutoReconnect() {
   const state = getPlayerState();
   if (!state || !state.lobbyId || !state.token) {
@@ -424,6 +439,7 @@ function showGameScreen(gameState) {
           <div class="turn-indicator">Tour: ${gameState.turnCount}</div>
           <div class="current-player">Joueur actuel: ${gameState.players.find(p => p.id === gameState.currentPlayer)?.name || ''}</div>
         </div>
+        <button id="quit-game-btn" class="btn btn-outline">Quitter la partie</button>
       </div>
       
       <!-- Plateau de jeu -->
@@ -457,9 +473,10 @@ function showGameScreen(gameState) {
   renderBoard(gameState.board, gameState.players, gameState.currentPlayer);
   renderPlayersInfo(gameState.players);
   updateGameLog(gameState.log);
-  
+
   // Ajouter les gestionnaires d'événements
   document.getElementById('roll-dice-btn').addEventListener('click', handleRollDice);
+  document.getElementById('quit-game-btn').addEventListener('click', handleQuitGame);
   
   // S'abonner aux mises à jour du jeu
   subscribeToGameState(updateGameScreen);
@@ -934,3 +951,4 @@ async function handleRollDice() {
 window.handleCreateLobby = handleCreateLobby;
 window.handleJoinLobby = handleJoinLobby;
 window.handleRefreshLobbies = handleRefreshLobbies;
+window.handleQuitGame = handleQuitGame;

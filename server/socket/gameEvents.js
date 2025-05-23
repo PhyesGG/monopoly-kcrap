@@ -1,5 +1,5 @@
 const Game = require('../game/Game');
-const { getLobbyBySocketId, getLobbyById } = require('./lobby');
+const { getLobbyBySocketId, getLobbyById, leaveLobby } = require('./lobby');
 const { saveGame } = require('../utils/gamePersistence');
 
 function startGame(io, socket, data) {
@@ -580,6 +580,39 @@ function unmortgageProperty(io, socket, { propertyId }) {
   return result;
 }
 
+function quitGame(io, socket) {
+  const lobby = getLobbyBySocketId(socket.id);
+
+  if (!lobby || !lobby.game) {
+    return { success: false, message: 'Partie non trouvée' };
+  }
+
+  const game = lobby.game;
+  const playerId = Object.keys(game.players).find(
+    id => game.players[id].socketId === socket.id
+  );
+
+  if (!playerId) {
+    return { success: false, message: 'Joueur non trouvé' };
+  }
+
+  const player = game.players[playerId];
+  game.playerBankruptcy(player);
+
+  io.of('/game').to(lobby.id).emit('player_quit', {
+    playerId,
+    gameState: game.getGameState()
+  });
+
+  saveGame(game, lobby);
+
+  leaveLobby(socket, { lobbyId: lobby.id });
+
+  socket.disconnect(true);
+
+  return { success: true };
+}
+
 module.exports = {
   startGame,
   rollDice,
@@ -593,5 +626,6 @@ module.exports = {
   buyHouse,
   buyHotel,
   mortgageProperty,
-  unmortgageProperty
+  unmortgageProperty,
+  quitGame
 };

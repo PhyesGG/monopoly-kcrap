@@ -132,6 +132,11 @@ export function initSocket(url = window.location.origin, onConnect) {
     console.log("Hypothèque levée:", playerId, propertyId, success, message);
     updateGameState(gameState);
   });
+
+  socket.on('player_quit', ({ playerId, gameState }) => {
+    console.log('Joueur a quitté la partie:', playerId);
+    updateGameState(gameState);
+  });
   
   socket.on('disconnect', () => {
     console.log('Déconnecté du serveur');
@@ -462,6 +467,23 @@ export function unmortgageProperty(propertyId) {
     socket.emit('unmortgage_property', { propertyId }, (response) => {
       if (response && response.success) {
         resolve(response);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
+export function quitGame() {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('quit_game', null, (response) => {
+      if (response && response.success) {
+        resolve(true);
       } else {
         reject(new Error(response ? response.message : 'Erreur inconnue'));
       }

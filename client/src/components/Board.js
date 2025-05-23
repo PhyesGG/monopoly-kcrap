@@ -1,11 +1,21 @@
 import { getGameState, subscribeToGameState } from '../state/game.js';
+import { renderProperty } from './Property.js';
+import {
+  buyHouse,
+  buyHotel,
+  mortgageProperty,
+  unmortgageProperty
+} from '../socket.js';
 
 /**
  * Initialise et met à jour l'affichage du plateau de jeu.
  * @param {string|HTMLElement} target - identifiant de l'élément ou élément DOM.
  */
-export function initBoard(target = 'board') {
+export function initBoard(target = 'board', infoTarget = null) {
   const container = typeof target === 'string' ? document.getElementById(target) : target;
+  const infoContainer = infoTarget
+    ? (typeof infoTarget === 'string' ? document.getElementById(infoTarget) : infoTarget)
+    : null;
   if (!container) return;
 
   container.style.display = 'grid';
@@ -38,6 +48,22 @@ export function initBoard(target = 'board') {
       }
 
       el.innerHTML = `<div class="square-name">${square.name}</div><div class="tokens"></div>${buildingsHTML}`;
+
+      if (infoContainer && square.type === 'property') {
+        el.addEventListener('click', () => {
+          infoContainer.innerHTML = renderProperty(square.id);
+
+          const bh = infoContainer.querySelector('.buy-house-btn');
+          if (bh) bh.addEventListener('click', () => buyHouse(square.id));
+          const bht = infoContainer.querySelector('.buy-hotel-btn');
+          if (bht) bht.addEventListener('click', () => buyHotel(square.id));
+          const mort = infoContainer.querySelector('.mortgage-btn');
+          if (mort) mort.addEventListener('click', () => mortgageProperty(square.id));
+          const unmort = infoContainer.querySelector('.unmortgage-btn');
+          if (unmort) unmort.addEventListener('click', () => unmortgageProperty(square.id));
+        });
+      }
+
       container.appendChild(el);
     });
 

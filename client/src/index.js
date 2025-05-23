@@ -892,6 +892,9 @@ function renderPlayersInfo(players) {
         <div class="money"><i class="fas fa-coins"></i> ${player.money}€</div>
         <div class="properties"><i class="fas fa-home"></i> ${player.properties.length} propriétés</div>
       </div>
+      <div class="money-bar-container">
+        <div class="money-bar" style="width:${Math.min(100, (player.money / 3000) * 100)}%"></div>
+      </div>
       <div class="player-special">
         ${player.revengeToken ? '<div class="revenge-token"><i class="fas fa-undo"></i> Jeton de revanche</div>' : ''}
         ${player.revengeActive ? '<div class="revenge-active"><i class="fas fa-exclamation-triangle"></i> Prêt actif</div>' : ''}

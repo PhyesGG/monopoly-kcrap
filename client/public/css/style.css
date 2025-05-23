@@ -913,6 +913,17 @@ body::before {
   justify-content: center;
 }
 
+/* Animation des pions lorsqu'ils avancent */
+.player-token.move-anim {
+  animation: tokenMove 0.5s ease;
+}
+
+@keyframes tokenMove {
+  0% { transform: translateY(-6px); }
+  50% { transform: translateY(2px); }
+  100% { transform: translateY(0); }
+}
+
 .group-brown { border-top-color: #964B00; }
 .group-light-blue { border-top-color: #ADD8E6; }
 .group-pink { border-top-color: #FF69B4; }
@@ -1134,6 +1145,19 @@ body::before {
   padding: 0.5rem 1rem;
   background: rgba(0, 255, 187, 0.1);
   border-radius: 4px;
+}
+
+/* Animation du lancer de dés */
+.dice.roll-anim {
+  animation: diceShake 0.6s ease;
+}
+
+@keyframes diceShake {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(20deg); }
+  40% { transform: rotate(-20deg); }
+  60% { transform: rotate(15deg); }
+  80% { transform: rotate(-15deg); }
 }
 
 .game-log {

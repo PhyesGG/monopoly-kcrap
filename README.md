@@ -88,3 +88,7 @@ Le client mémorise désormais le dernier nom de joueur saisi dans `localStorage
 Lorsque la page d'accueil est affichée, ce pseudonyme est automatiquement
 prérempli dans les champs "Votre nom". Ainsi, il n'est plus nécessaire de le
 renseigner à chaque nouvelle connexion.
+
+## Guide d'utilisation avancée
+
+Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour un guide détaillé incluant des exemples de configuration, les règles du mode KCRAP et la procédure de sauvegarde/restauration.

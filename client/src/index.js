@@ -30,11 +30,18 @@ import { renderProperty } from './components/Property.js';
 document.addEventListener('DOMContentLoaded', () => {
   // Passer explicitement la fonction de rappel en second argument pour
   // éviter que la fonction soit utilisée comme URL de connexion.
-  initSocket(undefined, async () => {
-    const restored = await attemptAutoReconnect();
-    if (!restored) {
-      await handlePathLobby();
+  initSocket(undefined, handlePathLobby);
+
+  // Nettoyer l'état lorsqu'on quitte la page
+  window.addEventListener('beforeunload', () => {
+    const state = getPlayerState();
+    const socket = getSocket();
+    if (socket && state && state.lobbyId) {
+      // Informer le serveur sans attendre de réponse
+      socket.emit('quit_game', { token: state.token });
+      socket.emit('leave_lobby', { lobbyId: state.lobbyId });
     }
+    clearPlayerState();
   });
 });
 

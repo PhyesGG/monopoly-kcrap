@@ -43,6 +43,11 @@ async function startServer() {
     app.get('/', (req, res) => {
       res.sendFile(path.join(__dirname, '../client/public/index.html'));
     });
+
+    // Servir index.html pour tout identifiant de lobby
+    app.get('/:lobbyId', (req, res) => {
+      res.sendFile(path.join(__dirname, '../client/public/index.html'));
+    });
     
     // Initialiser les gestionnaires de socket
     initSocketHandlers(io);

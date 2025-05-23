@@ -33,12 +33,38 @@ document.addEventListener('DOMContentLoaded', () => {
   initSocket(undefined, async () => {
     const restored = await attemptAutoReconnect();
     if (!restored) {
-      renderHomePage();
+      await handlePathLobby();
     }
   });
 });
 
-function renderHomePage() {
+async function handlePathLobby() {
+  const lobbyId = window.location.pathname.replace(/^\//, '');
+  if (lobbyId) {
+    const storedName = getUsername();
+    if (storedName) {
+      try {
+        const lobby = await joinLobby(storedName, lobbyId);
+        setPlayerState({
+          name: storedName,
+          lobbyId: lobby.id,
+          token: lobby.token,
+          socketId: getSocket().id
+        });
+        window.history.replaceState(null, '', `/${lobby.id}`);
+        showLobbyScreen(lobby);
+        return;
+      } catch (error) {
+        console.error('Auto join failed:', error);
+      }
+    }
+    renderHomePage(lobbyId);
+  } else {
+    renderHomePage();
+  }
+}
+
+function renderHomePage(prefillLobbyId = '') {
   const app = document.getElementById('app');
 
   app.innerHTML = `
@@ -79,7 +105,7 @@ function renderHomePage() {
           </div>
           <div class="input-group">
             <label for="lobby-id">Code du salon</label>
-            <input type="text" id="lobby-id" placeholder="Exemple: ABC123">
+            <input type="text" id="lobby-id" placeholder="Exemple: ABC123" value="${prefillLobbyId}">
           </div>
           <button id="join-lobby-btn" class="btn btn-secondary">
             <i class="fas fa-play"></i> Rejoindre la partie
@@ -112,6 +138,9 @@ function renderHomePage() {
   const storedName = getUsername();
   document.getElementById('player-name').value = storedName;
   document.getElementById('join-player-name').value = storedName;
+  if (prefillLobbyId) {
+    document.getElementById('lobby-id').value = prefillLobbyId;
+  }
   
   // Ajouter les polices et icônes
   if (!document.querySelector('link[href*="font-awesome"]')) {
@@ -158,6 +187,7 @@ async function handleCreateLobby() {
       token: lobby.token,
       socketId: getSocket().id
     });
+    window.history.pushState(null, '', `/${lobby.id}`);
     showLobbyScreen(lobby);
   } catch (error) {
     console.error('Erreur lors de la création du salon:', error);
@@ -186,6 +216,7 @@ async function handleJoinLobby() {
       token: lobby.token,
       socketId: getSocket().id
     });
+    window.history.pushState(null, '', `/${lobby.id}`);
     showLobbyScreen(lobby);
   } catch (error) {
     console.error('Erreur lors de l\'adhésion au salon:', error);
@@ -246,6 +277,7 @@ function renderLobbiesList(lobbies) {
       
       try {
         const lobby = await joinLobby(playerName, lobbyId);
+        window.history.pushState(null, '', `/${lobby.id}`);
         showLobbyScreen(lobby);
       } catch (error) {
         alert(`Erreur: ${error.message}`);
@@ -272,7 +304,7 @@ function showLobbyScreen(lobby) {
       <div class="lobby-content">
         <div class="lobby-info">
           <h2>Salon: ${lobby.name}</h2>
-          <p>Code d'invitation: <span class="lobby-code">${lobby.id}</span></p>
+          <p>Code d'invitation: <a href="/${lobby.id}" class="lobby-code">${lobby.id}</a></p>
           <div class="lobby-actions">
             ${lobby.isHost ? '<button id="start-game-btn" class="btn">Commencer la partie</button>' : '<p>En attente du début de la partie...</p>'}
             <button id="leave-lobby-btn" class="btn btn-outline">Quitter le salon</button>
@@ -382,6 +414,7 @@ async function handleLeaveLobby() {
     console.log('Salon quitté avec succès');
     clearPlayerState();
     // Retourner à l'écran des lobbies
+    window.history.pushState(null, '', '/');
     renderHomePage();
   } catch (error) {
     console.error('Erreur lors de la sortie du salon:', error);
@@ -396,6 +429,7 @@ async function handleQuitGame() {
     await quitGame();
     console.log('Partie quittée');
     clearPlayerState();
+    window.history.pushState(null, '', '/');
     renderHomePage();
   } catch (error) {
     console.error('Erreur lors de la sortie de la partie:', error);
@@ -412,6 +446,7 @@ async function attemptAutoReconnect() {
   try {
     const lobby = await reconnectPlayer(state.lobbyId, state.token, state.socketId);
     setPlayerState({ ...state, socketId: getSocket().id });
+    window.history.replaceState(null, '', `/${state.lobbyId}`);
     if (lobby.gameState) {
       showGameScreen(lobby.gameState);
     } else {

@@ -27,7 +27,9 @@ import { initBoard } from './components/Board.js';
 
 // Initialiser la connexion socket
 document.addEventListener('DOMContentLoaded', () => {
-  initSocket(async () => {
+  // Passer explicitement la fonction de rappel en second argument pour
+  // éviter que la fonction soit utilisée comme URL de connexion.
+  initSocket(undefined, async () => {
     const restored = await attemptAutoReconnect();
     if (!restored) {
       renderHomePage();

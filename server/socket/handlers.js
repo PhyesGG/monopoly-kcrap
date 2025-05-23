@@ -12,7 +12,8 @@ const {
   buyHouse,
   buyHotel,
   mortgageProperty,
-  unmortgageProperty
+  unmortgageProperty,
+  quitGame
 } = require('./gameEvents');
 
 function initSocketHandlers(io) {
@@ -131,6 +132,11 @@ function initSocketHandlers(io) {
 
     socket.on('unmortgage_property', (data, callback) => {
       const result = unmortgageProperty(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('quit_game', (data, callback) => {
+      const result = quitGame(io, socket);
       if (callback) callback(result);
     });
     

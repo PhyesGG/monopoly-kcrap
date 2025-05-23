@@ -750,24 +750,29 @@ class Game {
 
   playerBankruptcy(player, creditor = null) {
     player.bankrupt = true;
-    
+
     // Récupérer les propriétés du joueur
     const properties = [...player.properties];
+    player.properties = [];
     
     if (creditor) {
       // Transférer les propriétés au créancier
       properties.forEach(property => {
+        property.houses = 0;
+        property.hotel = false;
         property.owner = creditor;
         creditor.properties.push(property);
       });
-      
+
       this.log.push(`${player.name} a fait faillite. Toutes ses propriétés vont à ${creditor.name}`);
     } else {
       // Remettre les propriétés à la banque
       properties.forEach(property => {
+        property.houses = 0;
+        property.hotel = false;
         property.owner = null;
       });
-      
+
       this.log.push(`${player.name} a fait faillite. Toutes ses propriétés retournent à la banque`);
     }
     

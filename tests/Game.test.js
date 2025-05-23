@@ -216,6 +216,22 @@ describe('Game core methods', () => {
     expect(second.success).toBe(false); // doit construire sur autres cases avant
   });
 
+  test('playerBankruptcy removes buildings', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    game.addPlayer('Bob', 's2');
+    const prop = game.board.getSquareAt(5);
+    prop.owner = alice;
+    prop.houses = 2;
+    alice.properties.push(prop);
+
+    game.playerBankruptcy(alice);
+
+    expect(prop.owner).toBe(null);
+    expect(prop.houses).toBe(0);
+    expect(prop.hotel).toBe(false);
+    expect(alice.bankrupt).toBe(true);
+  });
+
   test('save and load game state', () => {
     const p1 = game.addPlayer('Alice', 's1');
     const p2 = game.addPlayer('Bob', 's2');

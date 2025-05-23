@@ -24,7 +24,7 @@ import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
 import { getPlayerState, setPlayerState, clearPlayerState } from './state/player';
 import { getUsername, setUsername } from './state/username';
-import { initBoard } from './components/Board.js';
+import { renderProperty } from './components/Property.js';
 
 // Initialiser la connexion socket
 document.addEventListener('DOMContentLoaded', () => {
@@ -451,6 +451,8 @@ function showGameScreen(gameState) {
       <div class="game-sidebar">
         <!-- Informations sur les joueurs -->
         <div id="players-info" class="players-panel"></div>
+        <!-- Détails propriété -->
+        <div id="property-info" class="property-info"></div>
         
         <!-- Contrôles du jeu -->
         <div id="game-controls" class="game-controls">
@@ -470,7 +472,7 @@ function showGameScreen(gameState) {
   `;
   
   // Initialiser le plateau et les contrôles
-  renderBoard(gameState.board, gameState.players, gameState.currentPlayer);
+  renderBoard(gameState.board, gameState.players, gameState.currentPlayer, 'property-info');
   renderPlayersInfo(gameState.players);
   updateGameLog(gameState.log);
 
@@ -487,7 +489,7 @@ function showGameScreen(gameState) {
 function updateGameScreen(gameState) {
   if (!gameState) return;
 
-  renderBoard(gameState.board, gameState.players, gameState.currentPlayer);
+  renderBoard(gameState.board, gameState.players, gameState.currentPlayer, 'property-info');
 
   renderPlayersInfo(gameState.players);
   updateGameLog(gameState.log);
@@ -772,8 +774,11 @@ function handleAllianceUI(alliance) {
 }
 
 // Fonctions de rendu du jeu
-function renderBoard(board, players = [], currentPlayerId = null) {
+function renderBoard(board, players = [], currentPlayerId = null, infoTarget = null) {
   const boardElement = document.getElementById('board');
+  const infoElement = infoTarget
+    ? (typeof infoTarget === 'string' ? document.getElementById(infoTarget) : infoTarget)
+    : null;
   if (!boardElement) return;
 
   boardElement.innerHTML = '';
@@ -800,6 +805,22 @@ function renderBoard(board, players = [], currentPlayerId = null) {
       buildingsHTML = `<div class="square-buildings houses">${'🏠'.repeat(square.houses)}</div>`;
     }
     el.innerHTML = `<div class="square-name">${square.name}</div><div class="tokens"></div>${buildingsHTML}`;
+
+    if (infoElement && square.type === 'property') {
+      el.addEventListener('click', () => {
+        infoElement.innerHTML = renderProperty(square.id);
+
+        const bh = infoElement.querySelector('.buy-house-btn');
+        if (bh) bh.addEventListener('click', () => buyHouse(square.id));
+        const bht = infoElement.querySelector('.buy-hotel-btn');
+        if (bht) bht.addEventListener('click', () => buyHotel(square.id));
+        const mort = infoElement.querySelector('.mortgage-btn');
+        if (mort) mort.addEventListener('click', () => mortgageProperty(square.id));
+        const unmort = infoElement.querySelector('.unmortgage-btn');
+        if (unmort) unmort.addEventListener('click', () => unmortgageProperty(square.id));
+      });
+    }
+
     boardElement.appendChild(el);
   });
 

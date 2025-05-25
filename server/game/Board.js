@@ -1,7 +1,9 @@
 const Property = require('./Property');
+const presets = require('./boardPresets');
 
 class Board {
-  constructor() {
+  constructor(presetName = 'classic') {
+    this.preset = presets[presetName] || presets.classic;
     this.squares = this.initializeBoard();
   }
 
@@ -222,6 +224,12 @@ class Board {
       type: 'go',
       name: 'Passage',
       position: 39
+    });
+
+    // Apply preset names if provided
+    Object.keys(this.preset).forEach(idx => {
+      const sq = squares.find(s => s.id === parseInt(idx, 10));
+      if (sq) sq.name = this.preset[idx];
     });
 
     return squares;

@@ -313,7 +313,13 @@ function showLobbyScreen(lobby) {
           <h2>Salon: ${lobby.name}</h2>
           <p>Code d'invitation: <a href="/${lobby.id}" class="lobby-code">${lobby.id}</a></p>
           <div class="lobby-actions">
-            ${lobby.isHost ? '<button id="start-game-btn" class="btn">Commencer la partie</button>' : '<p>En attente du début de la partie...</p>'}
+            ${lobby.isHost ? `
+              <select id="board-preset" class="preset-select">
+                <option value="classic">Classique</option>
+                <option value="english">Anglais</option>
+              </select>
+              <button id="start-game-btn" class="btn">Commencer la partie</button>
+            ` : '<p>En attente du début de la partie...</p>'}
             <button id="leave-lobby-btn" class="btn btn-outline">Quitter le salon</button>
           </div>
         </div>
@@ -405,7 +411,9 @@ function renderLobbyPlayers(players) {
 async function handleStartGame() {
   try {
     console.log('Tentative de démarrage de la partie');
-    await startGame();
+    const presetSelect = document.getElementById('board-preset');
+    const preset = presetSelect ? presetSelect.value : undefined;
+    await startGame(preset);
     console.log('Partie démarrée avec succès');
   } catch (error) {
     console.error('Erreur lors du démarrage de la partie:', error);
@@ -899,6 +907,7 @@ function renderBoard(board, players = [], currentPlayerId = null, infoTarget = n
 
 function renderPlayersInfo(players) {
   const playersInfo = document.getElementById('players-info');
+  if (!playersInfo) return; // Avoid errors if container is missing
   playersInfo.innerHTML = '<h3>Joueurs</h3>';
   
   players.forEach(player => {

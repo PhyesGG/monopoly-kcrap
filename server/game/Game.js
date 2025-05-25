@@ -9,10 +9,11 @@ const CardDeck = require('./cards/CardDeck');
 const JAIL_FINE = 50;
 
 class Game {
-  constructor() {
+  constructor(boardPreset = 'classic') {
     this.id = uuid.v4();
     this.players = {};
-    this.board = new Board();
+    this.boardPreset = boardPreset;
+    this.board = new Board(boardPreset);
     this.cardDeck = new CardDeck();
     this.currentPlayerIndex = 0;
     this.currentPlayer = null;
@@ -26,7 +27,7 @@ class Game {
   }
 
   static fromState(state) {
-    const game = new Game();
+    const game = new Game(state.boardPreset);
     game.id = state.id;
 
     // Reconstruire les joueurs
@@ -894,6 +895,7 @@ class Game {
       state: this.state,
       turnCount: this.turnCount,
       board: this.board.getState(),
+      boardPreset: this.boardPreset,
       digitalDisruption: this.digitalDisruptionTurnsLeft > 0,
       digitalDisruptionTurnsLeft: this.digitalDisruptionTurnsLeft,
       log: this.log.slice(-20) // Derniers 20 événements du log

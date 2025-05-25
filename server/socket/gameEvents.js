@@ -42,7 +42,7 @@ function startGame(io, socket, data = {}) {
   }
   
   // Initialiser le jeu
-  const game = new Game();
+  const game = new Game(data.boardPreset);
   
   // Ajouter les joueurs
   lobby.players.forEach(player => {

@@ -253,14 +253,14 @@ export function listLobbies() {
   });
 }
 
-export function startGame() {
+export function startGame(boardPreset) {
   return new Promise((resolve, reject) => {
     if (!socket) {
       reject(new Error('Socket non initialisé'));
       return;
     }
     
-    socket.emit('start_game', {}, (response) => {
+    socket.emit('start_game', { boardPreset }, (response) => {
       if (response && response.success) {
         resolve(true);
       } else {

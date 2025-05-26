@@ -566,19 +566,21 @@ function updateUIState(uiState) {
   // Afficher le résultat des dés
   if (uiState.diceResult) {
     const diceResultElement = document.getElementById('dice-result');
-    diceResultElement.innerHTML = `
-      <div class="dice-roll">
-        <div class="dice dice-${uiState.diceResult.dice1}">${uiState.diceResult.dice1}</div>
-        <div class="dice dice-${uiState.diceResult.dice2}">${uiState.diceResult.dice2}</div>
-        <div class="dice-total">${uiState.diceResult.total}</div>
-      </div>
-    `;
-    diceResultElement.querySelectorAll('.dice').forEach(el => {
-      el.classList.add('roll-anim');
-      el.addEventListener('animationend', () => {
-        el.classList.remove('roll-anim');
-      }, { once: true });
-    });
+    if (diceResultElement) {
+      diceResultElement.innerHTML = `
+        <div class="dice-roll">
+          <div class="dice dice-${uiState.diceResult.dice1}">${uiState.diceResult.dice1}</div>
+          <div class="dice dice-${uiState.diceResult.dice2}">${uiState.diceResult.dice2}</div>
+          <div class="dice-total">${uiState.diceResult.total}</div>
+        </div>
+      `;
+      diceResultElement.querySelectorAll('.dice').forEach(el => {
+        el.classList.add('roll-anim');
+        el.addEventListener('animationend', () => {
+          el.classList.remove('roll-anim');
+        }, { once: true });
+      });
+    }
   }
   
   // Gérer les enchères
@@ -606,6 +608,7 @@ function updateUIState(uiState) {
 function handleAuctionUI(auction) {
   // Pour une implémentation simplifiée
   const gameControls = document.getElementById('game-controls');
+  if (!gameControls) return;
   
   if (auction.ended) {
     gameControls.innerHTML = `
@@ -648,6 +651,7 @@ function handleAuctionUI(auction) {
 
 function handleCardUI(card) {
   const gameControls = document.getElementById('game-controls');
+  if (!gameControls) return;
   const state = getGameState();
 
   if (card.applied) {
@@ -786,6 +790,7 @@ function handleCardUI(card) {
 function handleRevengeUI(revenge) {
   // Pour une implémentation simplifiée
   const gameControls = document.getElementById('game-controls');
+  if (!gameControls) return;
   
   if (!revenge.activated && !revenge.declined) {
     gameControls.innerHTML = `
@@ -808,6 +813,7 @@ function handleRevengeUI(revenge) {
 function handleAllianceUI(alliance) {
   // Pour une implémentation simplifiée
   const gameControls = document.getElementById('game-controls');
+  if (!gameControls) return;
   
   if (alliance.created) {
     gameControls.innerHTML = `
@@ -1000,6 +1006,7 @@ function updateGameLog(log) {
 function updateGameControls(gameState) {
   // Gérer les contrôles selon l'état du jeu
   const gameControls = document.getElementById('game-controls');
+  if (!gameControls) return;
   
   if (gameState.state === 'rolling') {
     // Vérifier si c'est au tour du joueur actuel

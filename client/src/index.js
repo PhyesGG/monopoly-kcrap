@@ -877,11 +877,12 @@ function renderBoard(board, players = [], currentPlayerId = null, infoTarget = n
   boardElement.style.gap = '4px';
 
   const getGridPos = id => {
-    if (id === 39) return { row: 11, col: 11 };
-    if (id <= 9) return { row: 11, col: 10 - id };
-    if (id <= 19) return { row: 20 - id, col: 1 };
-    if (id <= 29) return { row: 1, col: id - 18 };
-    return { row: id - 28, col: 11 };
+    const rotated = (id + 19) % 40;
+    if (rotated === 39) return { row: 11, col: 11 };
+    if (rotated <= 9) return { row: 11, col: 10 - rotated };
+    if (rotated <= 19) return { row: 20 - rotated, col: 1 };
+    if (rotated <= 29) return { row: 1, col: rotated - 18 };
+    return { row: rotated - 28, col: 11 };
   };
 
   const currentPlayer = players.find(p => p.id === currentPlayerId);

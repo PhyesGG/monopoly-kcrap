@@ -11,7 +11,18 @@ import {
 // Gestionnaire de connexion au serveur
 let socket = null;
 
-export function initSocket(url = window.location.origin, onConnect) {
+export function initSocket(url, onConnect) {
+  // Lors du développement avec le client sur le port 8080, la connexion
+  // WebSocket doit cibler le serveur Express sur le port 3000.
+  if (!url) {
+    const { protocol, hostname, port } = window.location;
+    if (port === '8080') {
+      url = `${protocol}//${hostname}:3000`;
+    } else {
+      url = window.location.origin;
+    }
+  }
+
   if (socket) {
     socket.disconnect();
   }

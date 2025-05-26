@@ -30,7 +30,9 @@ class Player {
     
     // Si on passe par la case départ
     if (this.position < oldPosition) {
-      this.receiveMoney(200);
+      let bonus = 200;
+      if (this.position === 0) bonus = 300;
+      this.receiveMoney(bonus);
       return { passedGo: true };
     }
     

@@ -13,7 +13,8 @@ const {
   buyHotel,
   mortgageProperty,
   unmortgageProperty,
-  quitGame
+  quitGame,
+  startAuctionEvent
 } = require('./gameEvents');
 
 function initSocketHandlers(io) {
@@ -87,6 +88,11 @@ function initSocketHandlers(io) {
     
     socket.on('pass_bid', (data, callback) => {
       const result = passBid(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('start_auction', (data, callback) => {
+      const result = startAuctionEvent(io, socket, data);
       if (callback) callback(result);
     });
     

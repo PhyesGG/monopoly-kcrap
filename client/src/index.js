@@ -18,7 +18,8 @@ import {
   mortgageProperty,
   unmortgageProperty,
   reconnectPlayer,
-  quitGame
+  quitGame,
+  startAuction
 } from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
@@ -444,17 +445,26 @@ async function handleLeaveLobby() {
   }
 }
 
-// Quitter la partie en cours
-async function handleQuitGame() {
+// Quitter la partie sans abandonner
+function handleQuitGame() {
+  const socket = getSocket();
+  if (socket) socket.disconnect();
+  clearPlayerState();
+  window.history.pushState(null, '', '/');
+  renderHomePage();
+}
+
+// Déclarer la faillite et quitter
+async function handleBankruptGame() {
   try {
-    console.log('Tentative de quitter la partie');
+    console.log('Tentative de faillite volontaire');
     await quitGame();
-    console.log('Partie quittée');
+    console.log('Faillite déclarée');
     clearPlayerState();
     window.history.pushState(null, '', '/');
     renderHomePage();
   } catch (error) {
-    console.error('Erreur lors de la sortie de la partie:', error);
+    console.error('Erreur lors de la faillite:', error);
     alert(`Erreur: ${error.message}`);
   }
 }
@@ -496,13 +506,17 @@ function showGameScreen(gameState) {
           <div class="turn-indicator">Tour: ${gameState.turnCount}</div>
           <div class="current-player">Joueur actuel: ${gameState.players.find(p => p.id === gameState.currentPlayer)?.name || ''}</div>
         </div>
-        <button id="quit-game-btn" class="btn btn-outline">Quitter la partie</button>
+        <button id="quit-game-btn" class="btn btn-outline">Quitter</button>
+        <button id="bankrupt-btn" class="btn btn-danger">Abandonner</button>
       </div>
-      
+
       <!-- Plateau de jeu -->
       <div id="board-container">
         <div id="board"></div>
         <div id="property-info" class="property-info"></div>
+        <div id="auction-start" class="auction-start hidden">
+          <button id="start-auction-btn" class="btn btn-secondary">Lancer l'enchère</button>
+        </div>
       </div>
 
       <!-- Panneau latéral -->
@@ -535,6 +549,9 @@ function showGameScreen(gameState) {
   // Ajouter les gestionnaires d'événements
   document.getElementById('roll-dice-btn').addEventListener('click', handleRollDice);
   document.getElementById('quit-game-btn').addEventListener('click', handleQuitGame);
+  document.getElementById('bankrupt-btn').addEventListener('click', handleBankruptGame);
+  const startBtn = document.getElementById('start-auction-btn');
+  if (startBtn) startBtn.addEventListener('click', startAuction);
   
   // S'abonner aux mises à jour du jeu
   subscribeToGameState(updateGameScreen);
@@ -631,18 +648,22 @@ function handleAuctionUI(auction) {
     <div class="auction-controls">
       <h3>Enchère en cours</h3>
       <p class="property-name">${auction.property ? auction.property.name : ''}</p>
-      <p class="current-bid">Enchère actuelle: ${auction.amount || 0}€</p>
+      <p class="current-bid">Enchère actuelle: ${auction.amount || auction.startingBid || 0}€</p>
       <div class="bid-actions">
-        <input type="number" id="bid-amount" min="${(auction.amount || 0) + 10}" step="10" value="${(auction.amount || 0) + 10}">
-        <button id="place-bid-btn" class="btn btn-secondary">Enchérir</button>
+        <button class="bid-btn" data-inc="10">+10€</button>
+        <button class="bid-btn" data-inc="50">+50€</button>
+        <button class="bid-btn" data-inc="100">+100€</button>
         <button id="pass-bid-btn" class="btn btn-outline">Passer</button>
       </div>
     </div>
   `;
-  
-  document.getElementById('place-bid-btn').addEventListener('click', () => {
-    const amount = parseInt(document.getElementById('bid-amount').value);
-    placeBid(amount);
+
+  document.querySelectorAll('.bid-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inc = parseInt(btn.dataset.inc, 10);
+      const amount = (auction.amount || auction.startingBid || 0) + inc;
+      placeBid(amount);
+    });
   });
   
   document.getElementById('pass-bid-btn').addEventListener('click', passBid);
@@ -1018,7 +1039,7 @@ function updateGameControls(gameState) {
   // Gérer les contrôles selon l'état du jeu
   const gameControls = document.getElementById('game-controls');
   if (!gameControls) return;
-  
+
   if (gameState.state === 'rolling') {
     // Vérifier si c'est au tour du joueur actuel
     const socket = getSocket();
@@ -1042,6 +1063,20 @@ function updateGameControls(gameState) {
         </div>
       `;
     }
+  }
+
+  if (gameState.state === 'pending_auction') {
+    const overlay = document.getElementById('auction-start');
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      const btn = overlay.querySelector('#start-auction-btn');
+      if (btn) btn.onclick = startAuction;
+    }
+    gameControls.innerHTML = '<div class="waiting-message"><p>En attente du lancement de l\'enchère...</p></div>';
+    return;
+  } else {
+    const overlay = document.getElementById('auction-start');
+    if (overlay) overlay.classList.add('hidden');
   }
 }
 

@@ -19,6 +19,7 @@ class Game {
     this.currentPlayer = null;
     this.state = 'waiting'; // waiting, rolling, auction, card, action, ended
     this.currentAuction = null;
+    this.pendingAuction = null;
     this.currentAlliances = [];
     this.digitalDisruptionTurnsLeft = 0;
     this.lastDiceTotal = 0;
@@ -140,9 +141,9 @@ class Game {
 
     if (currentSquare.type === 'property') {
       if (!currentSquare.owner) {
-        this.startAuction(currentSquare);
-        this.state = 'auction';
-        actionResult = { type: 'auction', property: currentSquare };
+        this.pendingAuction = currentSquare;
+        this.state = 'pending_auction';
+        actionResult = { type: 'pending_auction', property: currentSquare };
       } else if (currentSquare.owner.id !== this.currentPlayer.id) {
         const rent = currentSquare.calculateRent({
           diceTotal: this.lastDiceTotal,
@@ -328,8 +329,18 @@ class Game {
     });
     
     this.log.push(`Une enchère commence pour ${property.name} à ${startingBid}€`);
-    
+
     return this.currentAuction;
+  }
+
+  launchPendingAuction() {
+    if (this.state !== 'pending_auction' || !this.pendingAuction) {
+      return null;
+    }
+    const auction = this.startAuction(this.pendingAuction);
+    this.state = 'auction';
+    this.pendingAuction = null;
+    return auction;
   }
 
   placeBid(playerId, amount) {

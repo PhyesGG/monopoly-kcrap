@@ -106,6 +106,43 @@ function rollDice(io, socket, data = {}) {
   return result;
 }
 
+function startAuctionEvent(io, socket, data = {}) {
+  const auth = checkAuth(socket, data.token);
+  if (auth) return auth;
+
+  const lobby = getLobbyBySocketId(socket.id);
+
+  if (!lobby || !lobby.game) {
+    return { success: false, message: 'Partie non trouvée' };
+  }
+
+  const game = lobby.game;
+
+  if (game.state !== 'pending_auction') {
+    return { success: false, message: "Aucune enchère à démarrer" };
+  }
+
+  const playerId = Object.keys(game.players).find(id =>
+    game.players[id].socketId === socket.id
+  );
+
+  if (!playerId || game.currentPlayer.id !== playerId) {
+    return { success: false, message: "Ce n'est pas votre tour" };
+  }
+
+  const auction = game.launchPendingAuction();
+
+  io.of('/game').to(lobby.id).emit('auction_started', {
+    property: auction.property,
+    startingBid: auction.startingBid,
+    gameState: game.getGameState()
+  });
+
+  saveGame(game, lobby);
+
+  return { success: true };
+}
+
 function placeBid(io, socket, data = {}) {
   const { amount, token } = data;
   const auth = checkAuth(socket, token);
@@ -689,5 +726,6 @@ module.exports = {
   buyHotel,
   mortgageProperty,
   unmortgageProperty,
-  quitGame
+  quitGame,
+  startAuctionEvent
 };

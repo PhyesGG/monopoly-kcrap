@@ -30,7 +30,15 @@ import { renderProperty } from './components/Property.js';
 document.addEventListener('DOMContentLoaded', () => {
   // Passer explicitement la fonction de rappel en second argument pour
   // éviter que la fonction soit utilisée comme URL de connexion.
-  initSocket(undefined, handlePathLobby);
+  // Lorsqu'une connexion est établie, tenter d'abord une reconnexion
+  // automatique à partir de l'état stocké. Si aucune partie n'est en cours
+  // ou que la reconnexion échoue, on gère alors le lobby depuis l'URL.
+  initSocket(undefined, async () => {
+    const reconnected = await attemptAutoReconnect();
+    if (!reconnected) {
+      handlePathLobby();
+    }
+  });
 
   // Nettoyer l'état lorsqu'on quitte la page
   window.addEventListener('beforeunload', () => {
@@ -366,6 +374,11 @@ function showLobbyScreen(lobby) {
     if (playerElement) {
       playerElement.remove();
     }
+    if (playerId === socket.id) {
+      clearPlayerState();
+      window.history.pushState(null, '', '/');
+      renderHomePage();
+    }
   });
   
   socket.on('host_changed', ({ newHostId }) => {
@@ -471,6 +484,7 @@ async function attemptAutoReconnect() {
   } catch (error) {
     console.error('Reconnexion échouée:', error);
     clearPlayerState();
+    window.history.replaceState(null, '', '/');
     return false;
   }
 }

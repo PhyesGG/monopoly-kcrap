@@ -81,11 +81,38 @@ class CardDeck {
     this.currentIndex = 0;
   }
 
-  drawCard() {
+  isCardValid(card, game) {
+    if (!game) return true;
+
+    const anyPropertyOwned = Object.values(game.players).some(
+      p => p.properties && p.properties.length > 0
+    );
+
+    if (!anyPropertyOwned && (card.type === 'exchange' || card.type === 'hostile')) {
+      return false;
+    }
+
+    return true;
+  }
+
+  drawCard(game = null) {
     if (this.currentIndex >= this.cards.length) {
       this.shuffle();
     }
-    
+
+    if (game) {
+      let attempts = 0;
+      while (attempts < this.cards.length) {
+        const card = this.cards[this.currentIndex];
+        if (this.isCardValid(card, game)) {
+          this.currentIndex++;
+          return card;
+        }
+        this.currentIndex = (this.currentIndex + 1) % this.cards.length;
+        attempts++;
+      }
+    }
+
     return this.cards[this.currentIndex++];
   }
 }

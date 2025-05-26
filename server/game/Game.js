@@ -182,7 +182,7 @@ class Game {
       }
     } else if (currentSquare.type === 'card') {
       this.state = 'card';
-      const card = this.cardDeck.drawCard();
+      const card = this.cardDeck.drawCard(this);
       this.log.push(`${this.currentPlayer.name} a tiré une carte ${card.title}`);
       actionResult = { type: 'card', card };
     } else if (currentSquare.type === 'tax') {

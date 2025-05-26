@@ -116,6 +116,9 @@ Lorsque qu'un joueur s'arrête sur la case « KCRAP », il pioche une carte sp
 - **Perturbation numérique** : taxation de 10 % des loyers pendant deux tours.
 - **Aller en prison** : le joueur est immédiatement envoyé en prison.
 
+Le paquet s'adapte également au contexte : les cartes visant à prendre ou à
+échanger une propriété ne sont plus tirées tant qu'aucun joueur n'en possède.
+
 Ces cartes ajoutent une dimension stratégique supplémentaire. Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour la description complète de chaque règle.
 
 ## Guide d'utilisation avancée

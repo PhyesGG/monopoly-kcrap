@@ -517,6 +517,7 @@ function showGameScreen(gameState) {
         <div id="auction-start" class="auction-start hidden">
           <button id="start-auction-btn" class="btn btn-secondary">Lancer l'enchère</button>
         </div>
+        <div id="auction-controls" class="auction-controls hidden"></div>
       </div>
 
       <!-- Panneau latéral -->
@@ -602,6 +603,9 @@ function updateUIState(uiState) {
   // Gérer les enchères
   if (uiState.auction) {
     handleAuctionUI(uiState.auction);
+  } else {
+    const overlay = document.getElementById('auction-controls');
+    if (overlay) overlay.classList.add('hidden');
   }
   
   // Gérer les cartes
@@ -622,16 +626,18 @@ function updateUIState(uiState) {
 
 // Fonctions d'interface pour les différentes mécaniques de jeu
 function handleAuctionUI(auction) {
-  // Pour une implémentation simplifiée
-  const gameControls = document.getElementById('game-controls');
-  if (!gameControls) return;
-  
+  // Affichage des enchères au centre du plateau
+  const overlay = document.getElementById('auction-controls');
+  if (!overlay) return;
+
+  overlay.classList.remove('hidden');
+
   if (auction.ended) {
-    gameControls.innerHTML = `
+    overlay.innerHTML = `
       <div class="auction-result">
         <h3>Enchère terminée</h3>
-        ${auction.result && auction.result.winner ? 
-          `<p>${auction.result.winner} a remporté ${auction.result.property.name} pour ${auction.result.price}€</p>` : 
+        ${auction.result && auction.result.winner ?
+          `<p>${auction.result.winner} a remporté ${auction.result.property.name} pour ${auction.result.price}€</p>` :
           `<p>Aucun acquéreur pour ${auction.result.property.name}</p>`
         }
         <button id="roll-dice-btn" class="btn action-btn">
@@ -639,12 +645,12 @@ function handleAuctionUI(auction) {
         </button>
       </div>
     `;
-    
-    document.getElementById('roll-dice-btn').addEventListener('click', handleRollDice);
+
+    overlay.querySelector('#roll-dice-btn').addEventListener('click', handleRollDice);
     return;
   }
-  
-  gameControls.innerHTML = `
+
+  overlay.innerHTML = `
     <div class="auction-controls">
       <h3>Enchère en cours</h3>
       <p class="property-name">${auction.property ? auction.property.name : ''}</p>
@@ -658,15 +664,15 @@ function handleAuctionUI(auction) {
     </div>
   `;
 
-  document.querySelectorAll('.bid-btn').forEach(btn => {
+  overlay.querySelectorAll('.bid-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const inc = parseInt(btn.dataset.inc, 10);
       const amount = (auction.amount || auction.startingBid || 0) + inc;
       placeBid(amount);
     });
   });
-  
-  document.getElementById('pass-bid-btn').addEventListener('click', passBid);
+
+  overlay.querySelector('#pass-bid-btn').addEventListener('click', passBid);
 }
 
 function handleCardUI(card) {

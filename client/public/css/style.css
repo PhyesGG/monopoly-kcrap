@@ -1310,6 +1310,22 @@ body::before {
   display: none;
 }
 
+#auction-controls {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(13, 13, 23, 0.8);
+  border: 1px solid rgba(0, 255, 187, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  z-index: 50;
+}
+
+#auction-controls.hidden {
+  display: none;
+}
+
 .auction-controls h3, .card-controls h3, .revenge-controls h3, .alliance-notification h3 {
   font-size: 1.2rem;
   margin-bottom: 1rem;

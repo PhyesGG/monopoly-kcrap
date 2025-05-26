@@ -542,4 +542,3 @@ export function reconnectPlayer(lobbyId, token, previousSocketId) {
   });
 }
 
-export { startAuction };

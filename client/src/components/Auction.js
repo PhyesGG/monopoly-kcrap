@@ -1,5 +1,5 @@
 import { getUIState, subscribeToUIState } from '../state/ui.js';
-import { placeBid, passBid } from '../socket.js';
+import { placeBid } from '../socket.js';
 
 /**
  * Affiche l'état de l'enchère courante et permet de placer une enchère.
@@ -33,7 +33,6 @@ export function initAuction(target = 'game-controls') {
         <div class="bid-actions">
           <input type="number" id="bid-amount" min="${(auction.amount || auction.startingBid || 0) + 10}" step="10" value="${(auction.amount || auction.startingBid || 0) + 10}">
           <button id="place-bid-btn" class="btn btn-secondary">Enchérir</button>
-          <button id="pass-bid-btn" class="btn btn-outline">Passer</button>
         </div>
       </div>`;
 
@@ -44,7 +43,6 @@ export function initAuction(target = 'game-controls') {
         placeBid(amount);
       }
     });
-    container.querySelector('#pass-bid-btn').addEventListener('click', passBid);
   };
 
   render();

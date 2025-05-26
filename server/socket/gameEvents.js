@@ -71,7 +71,7 @@ function startGame(io, socket, data = {}) {
   
   // Ajouter les joueurs
   lobby.players.forEach(player => {
-    game.addPlayer(player.name, player.id);
+    game.addPlayer(player.name, player.id, player.color);
   });
   
   // Démarrer la partie

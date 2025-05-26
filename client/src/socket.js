@@ -167,7 +167,7 @@ export function getSocket() {
   return socket;
 }
 
-export function createLobby(playerName, lobbyName) {
+export function createLobby(playerName, lobbyName, color = '#FF00A8') {
   return new Promise((resolve, reject) => {
     if (!socket) {
       console.error('Socket non initialisé lors de createLobby');
@@ -175,7 +175,7 @@ export function createLobby(playerName, lobbyName) {
       return;
     }
     
-    console.log('Émission de l\'événement create_lobby avec:', { playerName, lobbyName });
+    console.log('Émission de l\'événement create_lobby avec:', { playerName, lobbyName, color });
     
     // Ajouter un timeout pour la réponse
     const timeout = setTimeout(() => {
@@ -183,7 +183,7 @@ export function createLobby(playerName, lobbyName) {
       reject(new Error('Délai de réponse dépassé'));
     }, 5000);
     
-    socket.emit('create_lobby', { playerName, lobbyName }, (response) => {
+    socket.emit('create_lobby', { playerName, lobbyName, color }, (response) => {
       clearTimeout(timeout);
       console.log('Réponse reçue pour create_lobby:', response);
       
@@ -196,7 +196,7 @@ export function createLobby(playerName, lobbyName) {
   });
 }
 
-export function joinLobby(playerName, lobbyId) {
+export function joinLobby(playerName, lobbyId, color = '#FF00A8') {
   return new Promise((resolve, reject) => {
     if (!socket) {
       console.error('Socket non initialisé lors de joinLobby');
@@ -204,7 +204,7 @@ export function joinLobby(playerName, lobbyId) {
       return;
     }
     
-    console.log('Émission de l\'événement join_lobby avec:', { playerName, lobbyId });
+    console.log('Émission de l\'événement join_lobby avec:', { playerName, lobbyId, color });
     
     // Ajouter un timeout pour la réponse
     const timeout = setTimeout(() => {
@@ -212,12 +212,29 @@ export function joinLobby(playerName, lobbyId) {
       reject(new Error('Délai de réponse dépassé'));
     }, 5000);
     
-    socket.emit('join_lobby', { playerName, lobbyId }, (response) => {
+    socket.emit('join_lobby', { playerName, lobbyId, color }, (response) => {
       clearTimeout(timeout);
       console.log('Réponse reçue pour join_lobby:', response);
       
       if (response && response.success) {
         resolve(response.lobby);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
+export function setPlayerColor(color) {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('set_color', { color }, (response) => {
+      if (response && response.success) {
+        resolve(true);
       } else {
         reject(new Error(response ? response.message : 'Erreur inconnue'));
       }

@@ -19,7 +19,8 @@ import {
   unmortgageProperty,
   reconnectPlayer,
   quitGame,
-  startAuction
+  startAuction,
+  setPlayerColor
 } from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState } from './state/ui';
@@ -196,11 +197,13 @@ async function handleCreateLobby() {
     console.log('Tentative de création de salon avec:', { playerName, lobbyName });
     const lobby = await createLobby(playerName, lobbyName);
     console.log('Salon créé avec succès:', lobby);
+    const me = lobby.players.find(p => p.id === getSocket().id);
     setPlayerState({
       name: playerName,
       lobbyId: lobby.id,
       token: lobby.token,
-      socketId: getSocket().id
+      socketId: getSocket().id,
+      color: me && me.color ? me.color : '#FF00A8'
     });
     window.history.pushState(null, '', `/${lobby.id}`);
     showLobbyScreen(lobby);
@@ -225,11 +228,13 @@ async function handleJoinLobby() {
     console.log('Tentative de rejoindre le salon avec:', { playerName, lobbyId });
     const lobby = await joinLobby(playerName, lobbyId);
     console.log('Salon rejoint avec succès:', lobby);
+    const me = lobby.players.find(p => p.id === getSocket().id);
     setPlayerState({
       name: playerName,
       lobbyId: lobby.id,
       token: lobby.token,
-      socketId: getSocket().id
+      socketId: getSocket().id,
+      color: me && me.color ? me.color : '#FF00A8'
     });
     window.history.pushState(null, '', `/${lobby.id}`);
     showLobbyScreen(lobby);
@@ -304,7 +309,10 @@ function renderLobbiesList(lobbies) {
 // Afficher l'écran du lobby
 function showLobbyScreen(lobby) {
   const app = document.getElementById('app');
-  
+
+  const myPlayer = lobby.players.find(p => p.id === getSocket().id);
+  const myColor = myPlayer && myPlayer.color ? myPlayer.color : '#FF00A8';
+
   app.innerHTML = `
     <div class="lobby-screen">
       <div class="grid-lines"></div>
@@ -329,6 +337,10 @@ function showLobbyScreen(lobby) {
               <button id="start-game-btn" class="btn">Commencer la partie</button>
             ` : '<p>En attente du début de la partie...</p>'}
             <button id="leave-lobby-btn" class="btn btn-outline">Quitter le salon</button>
+            <div class="color-picker">
+              <label for="player-color">Couleur de votre pion</label>
+              <input type="color" id="player-color" value="${myColor}">
+            </div>
           </div>
         </div>
         
@@ -347,9 +359,14 @@ function showLobbyScreen(lobby) {
   if (lobby.isHost) {
     document.getElementById('start-game-btn').addEventListener('click', handleStartGame);
   }
-  
+
   // Gestionnaire pour quitter le salon
   document.getElementById('leave-lobby-btn').addEventListener('click', handleLeaveLobby);
+
+  const colorInput = document.getElementById('player-color');
+  if (colorInput) {
+    colorInput.addEventListener('change', handleColorChange);
+  }
   
   // S'abonner aux mises à jour du lobby via les événements socket
   const socket = getSocket();
@@ -361,7 +378,7 @@ function showLobbyScreen(lobby) {
     li.setAttribute('data-id', player.id);
     li.innerHTML = `
       <div class="player-item">
-        <i class="fas fa-user"></i>
+        <span class="color-dot" style="background:${player.color || '#FF00A8'}"></span>
         <span>${player.name}</span>
       </div>
     `;
@@ -390,6 +407,11 @@ function showLobbyScreen(lobby) {
       document.getElementById('leave-lobby-btn').addEventListener('click', handleLeaveLobby);
     }
   });
+
+  socket.on('player_color_changed', ({ playerId, color }) => {
+    const dot = document.querySelector(`#lobby-players li[data-id="${playerId}"] .color-dot`);
+    if (dot) dot.style.background = color;
+  });
   
   socket.on('game_started', ({ gameState }) => {
     console.log('Partie démarrée:', gameState);
@@ -407,7 +429,7 @@ function renderLobbyPlayers(players) {
     li.setAttribute('data-id', player.id);
     li.innerHTML = `
       <div class="player-item">
-        <i class="fas fa-user"></i>
+        <span class="color-dot" style="background:${player.color || '#FF00A8'}"></span>
         <span>${player.name}</span>
       </div>
     `;
@@ -445,6 +467,17 @@ async function handleLeaveLobby() {
   }
 }
 
+async function handleColorChange(e) {
+  const color = e.target.value;
+  try {
+    await setPlayerColor(color);
+    const state = getPlayerState();
+    setPlayerState({ ...state, color });
+  } catch (err) {
+    console.error('Erreur lors du changement de couleur:', err);
+  }
+}
+
 // Quitter la partie sans abandonner
 function handleQuitGame() {
   const socket = getSocket();
@@ -477,7 +510,8 @@ async function attemptAutoReconnect() {
 
   try {
     const lobby = await reconnectPlayer(state.lobbyId, state.token, state.socketId);
-    setPlayerState({ ...state, socketId: getSocket().id });
+    const me = lobby.players.find(p => p.id === getSocket().id || p.token === state.token);
+    setPlayerState({ ...state, socketId: getSocket().id, color: me && me.color ? me.color : state.color });
     window.history.replaceState(null, '', `/${state.lobbyId}`);
     if (lobby.gameState) {
       showGameScreen(lobby.gameState);

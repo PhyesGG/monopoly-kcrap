@@ -14,7 +14,7 @@ function validateToken(socket, token) {
   return !!(conn && conn.token && token && conn.token === token);
 }
 
-function createLobby(socket, { playerName, lobbyName }) {
+function createLobby(socket, { playerName, lobbyName, color = '#FF00A8' }) {
   console.log('Demande de création de lobby:', { playerName, lobbyName, socketId: socket.id });
 
   if (typeof playerName !== 'string' || playerName.trim() === '' ||
@@ -36,6 +36,7 @@ function createLobby(socket, { playerName, lobbyName }) {
       id: socket.id,
       token,
       name: playerName,
+      color,
       connected: true
     }],
     auctionTimer: null,
@@ -63,7 +64,7 @@ function createLobby(socket, { playerName, lobbyName }) {
   };
 }
 
-function joinLobby(socket, { playerName, lobbyId }) {
+function joinLobby(socket, { playerName, lobbyId, color = '#FF00A8' }) {
   console.log('Demande de rejoindre le lobby:', { playerName, lobbyId, socketId: socket.id });
 
   if (typeof playerName !== 'string' || playerName.trim() === '' ||
@@ -107,6 +108,7 @@ function joinLobby(socket, { playerName, lobbyId }) {
     id: socket.id,
     token,
     name: playerName,
+    color,
     connected: true
   });
 
@@ -120,7 +122,8 @@ function joinLobby(socket, { playerName, lobbyId }) {
   socket.to(lobbyId).emit('player_joined', {
     player: {
       id: socket.id,
-      name: playerName
+      name: playerName,
+      color
     }
   });
   
@@ -262,6 +265,23 @@ function listLobbies() {
   };
 }
 
+function setPlayerColor(socket, { color }) {
+  const lobbyId = playerConnections[socket.id]?.lobbyId;
+  if (!lobbyId || !lobbies[lobbyId]) {
+    return { success: false, message: 'Lobby non trouvé' };
+  }
+
+  const player = lobbies[lobbyId].players.find(p => p.id === socket.id);
+  if (!player) {
+    return { success: false, message: 'Joueur non trouvé' };
+  }
+
+  player.color = color || player.color;
+  socket.to(lobbyId).emit('player_color_changed', { playerId: socket.id, color: player.color });
+
+  return { success: true };
+}
+
 function getLobbyBySocketId(socketId) {
   const connection = playerConnections[socketId];
   return connection ? lobbies[connection.lobbyId] : null;
@@ -335,5 +355,6 @@ module.exports = {
   handleDisconnect,
   lobbies,
   registerLoadedGames,
-  validateToken
+  validateToken,
+  setPlayerColor
 };

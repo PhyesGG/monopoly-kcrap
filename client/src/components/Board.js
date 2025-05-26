@@ -81,7 +81,7 @@ export function initBoard(target = 'board', infoTarget = null) {
           token.style.width = '20px';
           token.style.height = '20px';
           token.style.borderRadius = '50%';
-          token.style.background = '#FF00A8';
+          token.style.background = player.color || '#FF00A8';
           token.style.color = '#000';
           token.style.fontSize = '0.75rem';
           token.style.lineHeight = '20px';

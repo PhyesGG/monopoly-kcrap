@@ -7,7 +7,6 @@ import {
   startGame,
   rollDice,
   placeBid,
-  passBid,
   activateRevenge,
   declineRevenge,
   createAlliance,
@@ -693,7 +692,6 @@ function handleAuctionUI(auction) {
         <button class="bid-btn" data-inc="10">+10€</button>
         <button class="bid-btn" data-inc="50">+50€</button>
         <button class="bid-btn" data-inc="100">+100€</button>
-        <button id="pass-bid-btn" class="btn btn-outline">Passer</button>
       </div>
     </div>
   `;
@@ -705,8 +703,6 @@ function handleAuctionUI(auction) {
       placeBid(amount);
     });
   });
-
-  overlay.querySelector('#pass-bid-btn').addEventListener('click', passBid);
 }
 
 function handleCardUI(card) {

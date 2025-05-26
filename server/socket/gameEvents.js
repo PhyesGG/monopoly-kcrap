@@ -234,9 +234,19 @@ function passBid(io, socket, data = {}) {
     };
   }
   
-  // Passer l'enchère
-  game.passBid(playerId);
-  
+  // Passer l'enchère et récupérer le résultat
+  const passResult = game.passBid(playerId);
+
+  // Si l'enchère a été finalisée pendant passBid
+  if (!game.currentAuction) {
+    io.of('/game').to(lobby.id).emit('auction_ended', {
+      result: passResult,
+      gameState: game.getGameState()
+    });
+    saveGame(game, lobby);
+    return passResult;
+  }
+
   // Avancer à la prochaine ronde d'enchères
   const roundResult = game.currentAuction.nextRound();
   

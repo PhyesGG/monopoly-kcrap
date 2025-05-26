@@ -121,6 +121,10 @@ Le paquet s'adapte également au contexte : les cartes visant à prendre ou à
 
 Ces cartes ajoutent une dimension stratégique supplémentaire. Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour la description complète de chaque règle.
 
+### Bonus de la case Départ
+
+À chaque tour de plateau complété, le joueur reçoit **200€**. S'il s'arrête exactement sur la case « Départ », le bonus est de **300€**.
+
 ## Guide d'utilisation avancée
 
 Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour un guide détaillé incluant des exemples de configuration, les règles du mode KCRAP et la procédure de sauvegarde/restauration.

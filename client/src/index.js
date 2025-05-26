@@ -502,14 +502,13 @@ function showGameScreen(gameState) {
       <!-- Plateau de jeu -->
       <div id="board-container">
         <div id="board"></div>
+        <div id="property-info" class="property-info"></div>
       </div>
-      
+
       <!-- Panneau latéral -->
       <div class="game-sidebar">
         <!-- Informations sur les joueurs -->
         <div id="players-info" class="players-panel"></div>
-        <!-- Détails propriété -->
-        <div id="property-info" class="property-info"></div>
         
         <!-- Contrôles du jeu -->
         <div id="game-controls" class="game-controls">
@@ -852,13 +851,25 @@ function renderBoard(board, players = [], currentPlayerId = null, infoTarget = n
 
   boardElement.innerHTML = '';
   boardElement.style.display = 'grid';
-  boardElement.style.gridTemplateColumns = 'repeat(10, 1fr)';
+  boardElement.style.gridTemplateColumns = 'repeat(11, 1fr)';
+  boardElement.style.gridTemplateRows = 'repeat(11, 1fr)';
   boardElement.style.gap = '4px';
+
+  const getGridPos = id => {
+    if (id === 39) return { row: 11, col: 11 };
+    if (id <= 9) return { row: 11, col: 10 - id };
+    if (id <= 19) return { row: 20 - id, col: 1 };
+    if (id <= 29) return { row: 1, col: id - 18 };
+    return { row: id - 28, col: 11 };
+  };
 
   const currentPlayer = players.find(p => p.id === currentPlayerId);
 
   board.forEach(square => {
     const el = document.createElement('div');
+    const pos = getGridPos(square.id);
+    el.style.gridRowStart = pos.row;
+    el.style.gridColumnStart = pos.col;
     let classes = `board-square ${square.type}`;
     if (square.group) classes += ` group-${square.group}`;
     if (currentPlayer && square.id === currentPlayer.position) {

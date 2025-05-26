@@ -93,6 +93,12 @@ export function initSocket(url, onConnect) {
     setAuctionState({ ended: true, result });
     updateGameState(gameState);
   });
+
+  socket.on('auction_started', ({ property, startingBid, gameState }) => {
+    console.log('Enchère démarrée');
+    setAuctionState({ started: true, property, startingBid, amount: startingBid });
+    updateGameState(gameState);
+  });
   
   socket.on('revenge_activated', ({ playerId, success, message, gameState }) => {
     console.log('Revanche activée:', playerId, success, message);
@@ -485,6 +491,23 @@ export function unmortgageProperty(propertyId) {
   });
 }
 
+export function startAuction() {
+  return new Promise((resolve, reject) => {
+    if (!socket) {
+      reject(new Error('Socket non initialisé'));
+      return;
+    }
+
+    socket.emit('start_auction', {}, (response) => {
+      if (response && response.success) {
+        resolve(response);
+      } else {
+        reject(new Error(response ? response.message : 'Erreur inconnue'));
+      }
+    });
+  });
+}
+
 export function quitGame() {
   return new Promise((resolve, reject) => {
     if (!socket) {
@@ -518,3 +541,5 @@ export function reconnectPlayer(lobbyId, token, previousSocketId) {
     });
   });
 }
+
+export { startAuction };

@@ -221,7 +221,7 @@ class Board {
 
     squares.push({
       id: 39,
-      type: 'go',
+      type: 'parking',
       name: 'Passage',
       position: 39
     });

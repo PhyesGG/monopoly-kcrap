@@ -1295,6 +1295,21 @@ body::before {
   padding: 0.8rem;
 }
 
+.auction-start {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.8);
+  padding: 1rem;
+  border-radius: 8px;
+  z-index: 50;
+}
+
+.auction-start.hidden {
+  display: none;
+}
+
 .auction-controls h3, .card-controls h3, .revenge-controls h3, .alliance-notification h3 {
   font-size: 1.2rem;
   margin-bottom: 1rem;

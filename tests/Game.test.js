@@ -42,9 +42,12 @@ describe('Game core methods', () => {
 
     const result = game.rollDice();
     expect(result.success).toBe(true);
-    expect(result.action.type).toBe('auction');
+    expect(result.action.type).toBe('pending_auction');
+    expect(game.state).toBe('pending_auction');
+
+    const auction = game.launchPendingAuction();
+    expect(auction).toBeDefined();
     expect(game.state).toBe('auction');
-    expect(game.currentAuction).toBeDefined();
     Math.random.mockRestore();
   });
 

@@ -977,6 +977,24 @@ body::before {
 .group-railroad { border-top-color: #FFFFFF; }
 .group-utility { border-top-color: #CCCCCC; }
 
+/* Orientation des cases selon leur position sur le plateau */
+.side-top .square-name {
+  writing-mode: horizontal-tb;
+}
+
+.side-bottom .square-name {
+  writing-mode: horizontal-tb;
+}
+
+.side-left .square-name {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.side-right .square-name {
+  writing-mode: vertical-rl;
+}
+
 #board-container::before {
   content: '';
   position: absolute;

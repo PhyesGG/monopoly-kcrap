@@ -1,4 +1,4 @@
-const { createLobby, joinLobby, leaveLobby, listLobbies, reconnectPlayer, handleDisconnect } = require('./lobby');
+const { createLobby, joinLobby, leaveLobby, listLobbies, reconnectPlayer, handleDisconnect, setPlayerColor } = require('./lobby');
 const { 
   startGame, 
   rollDice, 
@@ -67,6 +67,11 @@ function initSocketHandlers(io) {
         console.log('Envoi de la réponse list_lobbies:', result);
         callback(result);
       }
+    });
+
+    socket.on('set_color', (data, callback) => {
+      const result = setPlayerColor(socket, data);
+      if (callback) callback(result);
     });
     
     // Événements de jeu

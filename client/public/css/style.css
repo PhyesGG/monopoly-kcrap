@@ -804,6 +804,14 @@ body::before {
   color: var(--primary-color);
 }
 
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
 /* Écran de jeu */
 #game-screen {
   display: grid;

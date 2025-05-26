@@ -34,7 +34,7 @@ class Game {
     // Reconstruire les joueurs
     game.players = {};
     state.players.forEach(pData => {
-      const player = new Player(pData.name, null);
+      const player = new Player(pData.name, null, pData.color || '#FF00A8');
       player.id = pData.id;
       player.money = pData.money;
       player.position = pData.position;
@@ -77,8 +77,8 @@ class Game {
     return game;
   }
 
-  addPlayer(name, socketId) {
-    const player = new Player(name, socketId);
+  addPlayer(name, socketId, color = '#FF00A8') {
+    const player = new Player(name, socketId, color);
     this.players[player.id] = player;
     
     this.log.push(`${name} a rejoint la partie`);
@@ -889,6 +889,7 @@ class Game {
       players: Object.values(this.players).map(player => ({
         id: player.id,
         name: player.name,
+        color: player.color,
         money: player.money,
         position: player.position,
         properties: player.properties.map(p => p.id),

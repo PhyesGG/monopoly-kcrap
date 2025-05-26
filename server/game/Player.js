@@ -27,7 +27,7 @@ class Player {
   move(steps) {
     const oldPosition = this.position;
     this.position = (this.position + steps) % 40; // 40 cases sur le plateau standard
-    
+
     // Si on passe par la case départ
     if (this.position < oldPosition) {
       let bonus = 200;
@@ -35,7 +35,13 @@ class Player {
       this.receiveMoney(bonus);
       return { passedGo: true };
     }
-    
+
+    // Si on atterrit exactement sur la case départ sans l'avoir dépassée
+    if (this.position === 0 && oldPosition !== 0) {
+      this.receiveMoney(300);
+      return { passedGo: true };
+    }
+
     return { passedGo: false };
   }
 

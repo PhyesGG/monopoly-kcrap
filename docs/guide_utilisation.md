@@ -29,6 +29,10 @@ Le mode KCRAP introduit un paquet de cartes spéciales déclenché lorsque les j
 
 Ces cartes ajoutent une dimension stratégique supplémentaire et peuvent être utilisées à tout moment pendant la partie dès qu'elles sont tirées.
 
+## Bonus de la case Départ
+
+À chaque tour complet du plateau, un joueur reçoit **200€**. Si le déplacement l'amène exactement sur la case « Départ », le bonus est porté à **300€**.
+
 ## Sauvegarde et restauration des parties
 
 Chaque action de jeu déclenche automatiquement une sauvegarde dans le répertoire défini par `SAVE_PATH`. Les fichiers sont nommés d'après l'identifiant de la partie et contiennent l'état complet du plateau ainsi que les informations du lobby.

@@ -45,7 +45,12 @@ async function startServer() {
     });
 
     // Servir index.html pour tout identifiant de lobby
-    app.get('/:lobbyId', (req, res) => {
+    // Assurer que le chemin special "/socket.io" reste gere par Socket.IO
+    app.get('/:lobbyId', (req, res, next) => {
+      if (req.path.startsWith('/socket.io')) {
+        // Laisser socket.io gerer ces requetes
+        return next();
+      }
       res.sendFile(path.join(__dirname, '../client/public/index.html'));
     });
     

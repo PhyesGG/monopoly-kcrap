@@ -27,10 +27,17 @@ import { getUsername, setUsername } from './state/username';
 import { renderProperty } from './components/Property.js';
 
 // Initialiser la connexion socket
+async function handleSocketConnect() {
+  const restored = await attemptAutoReconnect();
+  if (!restored) {
+    handlePathLobby();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Passer explicitement la fonction de rappel en second argument pour
   // éviter que la fonction soit utilisée comme URL de connexion.
-  initSocket(undefined, handlePathLobby);
+  initSocket(undefined, handleSocketConnect);
 
   // Nettoyer l'état lorsqu'on quitte la page
   window.addEventListener('beforeunload', () => {

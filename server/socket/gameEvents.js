@@ -7,6 +7,31 @@ const {
 } = require('./lobby');
 const { saveGame } = require('../utils/gamePersistence');
 
+// Gestion du timer d'enchère
+function clearAuctionTimer(lobby) {
+  if (lobby && lobby.auctionTimer) {
+    clearTimeout(lobby.auctionTimer);
+    lobby.auctionTimer = null;
+  }
+}
+
+function startAuctionTimer(io, lobby) {
+  clearAuctionTimer(lobby);
+  lobby.auctionTimer = setTimeout(() => {
+    if (!lobby.game || !lobby.game.currentAuction) return;
+
+    const result = lobby.game.finalizeAuction();
+
+    io.of('/game').to(lobby.id).emit('auction_ended', {
+      result,
+      gameState: lobby.game.getGameState()
+    });
+
+    saveGame(lobby.game, lobby);
+    clearAuctionTimer(lobby);
+  }, 10000);
+}
+
 function checkAuth(socket, token) {
   if (token !== undefined && !validateToken(socket, token)) {
     return { success: false, message: 'Authentification invalide' };
@@ -138,6 +163,8 @@ function startAuctionEvent(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
+  startAuctionTimer(io, lobby);
+
   saveGame(game, lobby);
 
   return { success: true };
@@ -194,6 +221,10 @@ function placeBid(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
+  if (result.success) {
+    startAuctionTimer(io, lobby);
+  }
+
   saveGame(game, lobby);
 
   return result;
@@ -243,6 +274,7 @@ function passBid(io, socket, data = {}) {
       result: passResult,
       gameState: game.getGameState()
     });
+    clearAuctionTimer(lobby);
     saveGame(game, lobby);
     return passResult;
   }
@@ -258,6 +290,7 @@ function passBid(io, socket, data = {}) {
       result: auctionResult,
       gameState: game.getGameState()
     });
+    clearAuctionTimer(lobby);
   } else {
     // Informer tous les joueurs du résultat
     io.of('/game').to(lobby.id).emit('bid_passed', {

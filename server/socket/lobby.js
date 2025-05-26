@@ -38,6 +38,7 @@ function createLobby(socket, { playerName, lobbyName }) {
       name: playerName,
       connected: true
     }],
+    auctionTimer: null,
     game: null,
     createdAt: Date.now()
   };
@@ -316,6 +317,7 @@ function registerLoadedGames(savedGames) {
         ...p,
         connected: false
       })),
+      auctionTimer: null,
       game,
       createdAt: lobbyData.createdAt || Date.now()
     };

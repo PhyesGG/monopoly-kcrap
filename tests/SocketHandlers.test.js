@@ -2,7 +2,7 @@ const { createLobby, joinLobby, lobbies, validateToken } = require('../server/so
 const { startGame } = require('../server/socket/gameEvents');
 
 describe('Socket handlers authentication', () => {
-  test('startGame requires valid token', () => {
+  test('startGame requires valid token', async () => {
     const io = { of: () => ({ to: () => ({ emit: jest.fn() }) }) };
     const hostSocket = { id: 's1', join: jest.fn(), to: () => ({ emit: jest.fn() }), disconnect: jest.fn() };
     const playerSocket = { id: 's2', join: jest.fn(), to: () => ({ emit: jest.fn() }) };
@@ -14,10 +14,10 @@ describe('Socket handlers authentication', () => {
     expect(validateToken(hostSocket, createRes.lobby.token)).toBe(true);
     expect(validateToken(hostSocket, 'bad')).toBe(false);
 
-    const bad = startGame(io, hostSocket, { token: 'bad' });
+    const bad = await startGame(io, hostSocket, { token: 'bad' });
     expect(bad.success).toBe(false);
 
-    const good = startGame(io, hostSocket, { token: createRes.lobby.token });
+    const good = await startGame(io, hostSocket, { token: createRes.lobby.token });
     expect(good.success).toBe(true);
     expect(lobbies[lobbyId].game).toBeDefined();
   });

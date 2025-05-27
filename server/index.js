@@ -20,7 +20,7 @@ async function startServer() {
     const port = PORT;
     
     // Charger les parties sauvegardées
-    const saved = loadSavedGames();
+    const saved = await loadSavedGames();
     console.log(`Jeux sauvegardés chargés: ${Object.keys(saved).length}`);
     registerLoadedGames(saved);
 

@@ -39,7 +39,7 @@ function checkAuth(socket, token) {
   return null;
 }
 
-function startGame(io, socket, data = {}) {
+async function startGame(io, socket, data = {}) {
   const auth = checkAuth(socket, data.token);
   if (auth) return auth;
 
@@ -89,12 +89,12 @@ function startGame(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return { success: true };
 }
 
-function rollDice(io, socket, data = {}) {
+async function rollDice(io, socket, data = {}) {
   const auth = checkAuth(socket, data.token);
   if (auth) return auth;
 
@@ -126,12 +126,12 @@ function rollDice(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
+  await saveGame(game, lobby);
 
   return result;
 }
 
-function startAuctionEvent(io, socket, data = {}) {
+async function startAuctionEvent(io, socket, data = {}) {
   const auth = checkAuth(socket, data.token);
   if (auth) return auth;
 
@@ -165,12 +165,12 @@ function startAuctionEvent(io, socket, data = {}) {
 
   startAuctionTimer(io, lobby);
 
-  saveGame(game, lobby);
+  await saveGame(game, lobby);
 
   return { success: true };
 }
 
-function placeBid(io, socket, data = {}) {
+async function placeBid(io, socket, data = {}) {
   const { amount, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -225,12 +225,12 @@ function placeBid(io, socket, data = {}) {
     startAuctionTimer(io, lobby);
   }
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function passBid(io, socket, data = {}) {
+async function passBid(io, socket, data = {}) {
   const auth = checkAuth(socket, data.token);
   if (auth) return auth;
 
@@ -275,7 +275,7 @@ function passBid(io, socket, data = {}) {
       gameState: game.getGameState()
     });
     clearAuctionTimer(lobby);
-    saveGame(game, lobby);
+    await saveGame(game, lobby);
     return passResult;
   }
 
@@ -300,12 +300,12 @@ function passBid(io, socket, data = {}) {
     });
   }
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return { success: true };
 }
 
-function activateRevenge(io, socket, data = {}) {
+async function activateRevenge(io, socket, data = {}) {
   const auth = checkAuth(socket, data.token);
   if (auth) return auth;
 
@@ -351,12 +351,12 @@ function activateRevenge(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function declineRevenge(io, socket, data = {}) {
+async function declineRevenge(io, socket, data = {}) {
   const auth = checkAuth(socket, data.token);
   if (auth) return auth;
 
@@ -402,12 +402,12 @@ function declineRevenge(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function createAlliance(io, socket, data = {}) {
+async function createAlliance(io, socket, data = {}) {
   const { targetPlayerId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -450,12 +450,12 @@ function createAlliance(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function breakAlliance(io, socket, data = {}) {
+async function breakAlliance(io, socket, data = {}) {
   const { unilateral = true, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -498,12 +498,12 @@ function breakAlliance(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function applyCardEffect(io, socket, data = {}) {
+async function applyCardEffect(io, socket, data = {}) {
   const { cardId, params, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -554,12 +554,12 @@ function applyCardEffect(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function buyHouse(io, socket, data = {}) {
+async function buyHouse(io, socket, data = {}) {
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -594,12 +594,12 @@ function buyHouse(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function buyHotel(io, socket, data = {}) {
+async function buyHotel(io, socket, data = {}) {
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -634,12 +634,12 @@ function buyHotel(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function mortgageProperty(io, socket, data = {}) {
+async function mortgageProperty(io, socket, data = {}) {
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -674,12 +674,12 @@ function mortgageProperty(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function unmortgageProperty(io, socket, data = {}) {
+async function unmortgageProperty(io, socket, data = {}) {
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -714,12 +714,12 @@ function unmortgageProperty(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
-
+  await saveGame(game, lobby);
+  
   return result;
 }
 
-function quitGame(io, socket, data = {}) {
+async function quitGame(io, socket, data = {}) {
   const auth = checkAuth(socket, data.token);
   if (auth) return auth;
 
@@ -746,7 +746,7 @@ function quitGame(io, socket, data = {}) {
     gameState: game.getGameState()
   });
 
-  saveGame(game, lobby);
+  await saveGame(game, lobby);
 
   leaveLobby(socket, { lobbyId: lobby.id });
 

@@ -162,3 +162,4 @@ function initSocketHandlers(io) {
 }
 
 module.exports = { initSocketHandlers };
+

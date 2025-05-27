@@ -33,3 +33,4 @@ module.exports = {
   SQUARE_TYPES,
   CARD_TYPES
 };
+

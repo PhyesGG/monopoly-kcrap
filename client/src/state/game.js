@@ -25,3 +25,4 @@ export function subscribeToGameState(listener) {
 function notifyListeners() {
   listeners.forEach(listener => listener(gameState));
 }
+

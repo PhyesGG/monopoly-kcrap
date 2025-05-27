@@ -585,7 +585,7 @@ function showGameScreen(gameState) {
   document.getElementById('quit-game-btn').addEventListener('click', handleQuitGame);
   document.getElementById('bankrupt-btn').addEventListener('click', handleBankruptGame);
   const startBtn = document.getElementById('start-auction-btn');
-  if (startBtn) startBtn.addEventListener('click', startAuction);
+  if (startBtn) startBtn.addEventListener('click', handleStartAuction);
   
   // S'abonner aux mises à jour du jeu
   subscribeToGameState(updateGameScreen);
@@ -1113,7 +1113,7 @@ function updateGameControls(gameState) {
     if (overlay) {
       overlay.classList.remove('hidden');
       const btn = overlay.querySelector('#start-auction-btn');
-      if (btn) btn.onclick = startAuction;
+      if (btn) btn.onclick = handleStartAuction;
     }
     gameControls.innerHTML = '<div class="waiting-message"><p>En attente du lancement de l\'enchère...</p></div>';
     return;
@@ -1131,6 +1131,18 @@ async function handleRollDice() {
     console.log('Dés lancés avec succès');
   } catch (error) {
     console.error('Erreur lors du lancement des dés:', error);
+    alert(`Erreur: ${error.message}`);
+  }
+}
+
+// Démarrer l'enchère en attente
+async function handleStartAuction() {
+  try {
+    console.log("Tentative de démarrage de l'enchère");
+    await startAuction();
+    console.log("Enchère démarrée avec succès");
+  } catch (error) {
+    console.error("Erreur lors du démarrage de l'enchère:", error);
     alert(`Erreur: ${error.message}`);
   }
 }

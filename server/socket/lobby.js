@@ -358,3 +358,4 @@ module.exports = {
   validateToken,
   setPlayerColor
 };
+

@@ -1,4 +1,6 @@
 const { createLobby, joinLobby, leaveLobby, listLobbies, reconnectPlayer, handleDisconnect, setPlayerColor } = require('./lobby');
+const Logger = require('../utils/logger');
+const logger = new Logger('socket');
 const { 
   startGame, 
   rollDice, 
@@ -21,50 +23,50 @@ function initSocketHandlers(io) {
   // Espace de noms pour les jeux
   const gameNamespace = io.of('/game');
   
-  console.log('Initialisation des gestionnaires de socket pour le namespace /game');
+  logger.info('Initialisation des gestionnaires de socket pour le namespace /game');
   
   gameNamespace.on('connection', (socket) => {
-    console.log(`Nouvelle connexion socket: ${socket.id}`);
+    logger.info(`Nouvelle connexion socket: ${socket.id}`);
     
     // Événements de lobby
     socket.on('create_lobby', (data, callback) => {
-      console.log('Événement create_lobby reçu:', data);
+      logger.info(`Événement create_lobby reçu: ${JSON.stringify(data)}`);
       const result = createLobby(socket, data);
       if (callback) {
-        console.log('Envoi de la réponse create_lobby:', result);
+        logger.info(`Envoi de la réponse create_lobby: ${JSON.stringify(result)}`);
         callback(result);
       }
     });
     
     socket.on('join_lobby', (data, callback) => {
-      console.log('Événement join_lobby reçu:', data);
+      logger.info(`Événement join_lobby reçu: ${JSON.stringify(data)}`);
       const result = joinLobby(socket, data);
       if (callback) {
-        console.log('Envoi de la réponse join_lobby:', result);
+        logger.info(`Envoi de la réponse join_lobby: ${JSON.stringify(result)}`);
         callback(result);
       }
     });
 
     socket.on('reconnect_player', (data, callback) => {
-      console.log('Événement reconnect_player reçu:', data);
+      logger.info(`Événement reconnect_player reçu: ${JSON.stringify(data)}`);
       const result = reconnectPlayer(socket, data);
       if (callback) callback(result);
     });
     
     socket.on('leave_lobby', (data, callback) => {
-      console.log('Événement leave_lobby reçu:', data);
+      logger.info(`Événement leave_lobby reçu: ${JSON.stringify(data)}`);
       const result = leaveLobby(socket, data);
       if (callback) {
-        console.log('Envoi de la réponse leave_lobby:', result);
+        logger.info(`Envoi de la réponse leave_lobby: ${JSON.stringify(result)}`);
         callback(result);
       }
     });
     
     socket.on('list_lobbies', (callback) => {
-      console.log('Événement list_lobbies reçu');
+      logger.info('Événement list_lobbies reçu');
       const result = listLobbies();
       if (callback) {
-        console.log('Envoi de la réponse list_lobbies:', result);
+        logger.info(`Envoi de la réponse list_lobbies: ${JSON.stringify(result)}`);
         callback(result);
       }
     });
@@ -76,7 +78,7 @@ function initSocketHandlers(io) {
     
     // Événements de jeu
     socket.on('start_game', (data, callback) => {
-      console.log('Événement start_game reçu:', data);
+      logger.info(`Événement start_game reçu: ${JSON.stringify(data)}`);
       const result = startGame(io, socket, data);
       if (callback) callback(result);
     });
@@ -153,7 +155,7 @@ function initSocketHandlers(io) {
     
     // Déconnexion
     socket.on('disconnect', () => {
-      console.log(`Déconnexion socket: ${socket.id}`);
+      logger.info(`Déconnexion socket: ${socket.id}`);
       handleDisconnect(socket);
     });
   });

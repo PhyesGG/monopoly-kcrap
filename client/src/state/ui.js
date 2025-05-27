@@ -3,7 +3,8 @@ let uiState = {
   auction: null,
   card: null,
   revenge: null,
-  alliance: null
+  alliance: null,
+  leaderboard: null
 };
 
 const listeners = [];
@@ -30,6 +31,11 @@ export function setRevengeState(revenge) {
 
 export function setAllianceState(alliance) {
   uiState = { ...uiState, alliance };
+  notifyListeners();
+}
+
+export function setLeaderboard(leaderboard) {
+  uiState = { ...uiState, leaderboard };
   notifyListeners();
 }
 

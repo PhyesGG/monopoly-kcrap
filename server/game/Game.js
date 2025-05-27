@@ -25,6 +25,11 @@ class Game {
     this.lastDiceTotal = 0;
     this.turnCount = 0;
     this.log = [];
+    this.onEndCallback = null;
+  }
+
+  onEnd(callback) {
+    this.onEndCallback = callback;
   }
 
   static fromState(state) {
@@ -854,7 +859,7 @@ class Game {
 
   endGame(winner = null) {
     this.state = 'ended';
-    
+
     if (!winner) {
       const activePlayers = Object.values(this.players).filter(p => !p.bankrupt);
       
@@ -863,24 +868,42 @@ class Game {
       }
     }
     
+    const ranking = Object.values(this.players)
+      .sort((a, b) => b.money - a.money)
+      .map(p => ({ name: p.name, money: p.money }));
+
+    let result;
+
     if (winner) {
       this.log.push(`${winner.name} a gagné la partie!`);
-      
-      return {
+
+      result = {
         winner: winner.name,
         stats: {
           turns: this.turnCount,
           money: winner.money,
           properties: winner.properties.length
-        }
+        },
+        ranking
       };
     } else {
       this.log.push("La partie s'est terminée sans vainqueur");
-      
-      return {
-        winner: null
+
+      result = {
+        winner: null,
+        ranking
       };
     }
+
+    if (typeof this.onEndCallback === 'function') {
+      try {
+        this.onEndCallback(result);
+      } catch (err) {
+        console.error('Error in end callback:', err);
+      }
+    }
+
+    return result;
   }
 
   getGameState() {

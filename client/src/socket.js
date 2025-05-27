@@ -1,11 +1,12 @@
 import io from 'socket.io-client';
 import { updateGameState } from './state/game';
-import { 
+import {
   setDiceResult,
   setAuctionState,
   setCardState,
   setRevengeState,
-  setAllianceState
+  setAllianceState,
+  setLeaderboard
 } from './state/ui';
 
 // Gestionnaire de connexion au serveur
@@ -152,6 +153,12 @@ export function initSocket(url, onConnect) {
 
   socket.on('player_quit', ({ playerId, gameState }) => {
     console.log('Joueur a quitté la partie:', playerId);
+    updateGameState(gameState);
+  });
+
+  socket.on('game_ended', ({ result, gameState }) => {
+    console.log('Partie terminée');
+    setLeaderboard(result.ranking);
     updateGameState(gameState);
   });
   

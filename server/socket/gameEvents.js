@@ -68,6 +68,14 @@ async function startGame(io, socket, data = {}) {
   
   // Initialiser le jeu
   const game = new Game(data.boardPreset);
+
+  // Lors de la fin de partie, informer tous les joueurs
+  game.onEnd((result) => {
+    io.of('/game').to(lobby.id).emit('game_ended', {
+      result,
+      gameState: game.getGameState()
+    });
+  });
   
   // Ajouter les joueurs
   lobby.players.forEach(player => {

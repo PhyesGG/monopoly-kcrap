@@ -26,6 +26,7 @@ import { getUIState, subscribeToUIState } from './state/ui';
 import { getPlayerState, setPlayerState, clearPlayerState } from './state/player';
 import { getUsername, setUsername } from './state/username';
 import { renderProperty } from './components/Property.js';
+import { renderLeaderboard } from './components/Leaderboard.js';
 
 // Initialiser la connexion socket
 async function handleSocketConnect() {
@@ -654,6 +655,10 @@ function updateUIState(uiState) {
   // Gérer les alliances
   if (uiState.alliance) {
     handleAllianceUI(uiState.alliance);
+  }
+
+  if (uiState.leaderboard) {
+    renderLeaderboard(uiState.leaderboard, handleQuitGame);
   }
 }
 

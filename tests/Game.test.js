@@ -235,7 +235,7 @@ describe('Game core methods', () => {
     expect(alice.bankrupt).toBe(true);
   });
 
-  test('save and load game state', () => {
+  test('save and load game state', async () => {
     const p1 = game.addPlayer('Alice', 's1');
     const p2 = game.addPlayer('Bob', 's2');
     jest.spyOn(global.Math, 'random').mockReturnValue(0);
@@ -249,8 +249,8 @@ describe('Game core methods', () => {
 
     game.applyDigitalDisruption(2);
 
-    saveGame(game);
-    const loaded = loadGame(game.id);
+    await saveGame(game);
+    const loaded = await loadGame(game.id);
     expect(loaded).not.toBeNull();
     expect(Object.keys(loaded.game.players)).toHaveLength(2);
     expect(loaded.game.digitalDisruptionTurnsLeft).toBe(2);

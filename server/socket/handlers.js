@@ -77,79 +77,79 @@ function initSocketHandlers(io) {
     });
     
     // Événements de jeu
-    socket.on('start_game', (data, callback) => {
+    socket.on('start_game', async (data, callback) => {
       logger.info(`Événement start_game reçu: ${JSON.stringify(data)}`);
-      const result = startGame(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('roll_dice', (data, callback) => {
-      const result = rollDice(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('place_bid', (data, callback) => {
-      const result = placeBid(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('pass_bid', (data, callback) => {
-      const result = passBid(io, socket, data);
+      const result = await startGame(io, socket, data);
       if (callback) callback(result);
     });
 
-    socket.on('start_auction', (data, callback) => {
-      const result = startAuctionEvent(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('activate_revenge', (data, callback) => {
-      const result = activateRevenge(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('decline_revenge', (data, callback) => {
-      const result = declineRevenge(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('create_alliance', (data, callback) => {
-      const result = createAlliance(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('break_alliance', (data, callback) => {
-      const result = breakAlliance(io, socket, data);
-      if (callback) callback(result);
-    });
-    
-    socket.on('apply_card_effect', (data, callback) => {
-      const result = applyCardEffect(io, socket, data);
+    socket.on('roll_dice', async (data, callback) => {
+      const result = await rollDice(io, socket, data);
       if (callback) callback(result);
     });
 
-    socket.on('buy_house', (data, callback) => {
-      const result = buyHouse(io, socket, data);
+    socket.on('place_bid', async (data, callback) => {
+      const result = await placeBid(io, socket, data);
       if (callback) callback(result);
     });
 
-    socket.on('buy_hotel', (data, callback) => {
-      const result = buyHotel(io, socket, data);
+    socket.on('pass_bid', async (data, callback) => {
+      const result = await passBid(io, socket, data);
       if (callback) callback(result);
     });
 
-    socket.on('mortgage_property', (data, callback) => {
-      const result = mortgageProperty(io, socket, data);
+    socket.on('start_auction', async (data, callback) => {
+      const result = await startAuctionEvent(io, socket, data);
       if (callback) callback(result);
     });
 
-    socket.on('unmortgage_property', (data, callback) => {
-      const result = unmortgageProperty(io, socket, data);
+    socket.on('activate_revenge', async (data, callback) => {
+      const result = await activateRevenge(io, socket, data);
       if (callback) callback(result);
     });
 
-    socket.on('quit_game', (data, callback) => {
-      const result = quitGame(io, socket);
+    socket.on('decline_revenge', async (data, callback) => {
+      const result = await declineRevenge(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('create_alliance', async (data, callback) => {
+      const result = await createAlliance(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('break_alliance', async (data, callback) => {
+      const result = await breakAlliance(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('apply_card_effect', async (data, callback) => {
+      const result = await applyCardEffect(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('buy_house', async (data, callback) => {
+      const result = await buyHouse(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('buy_hotel', async (data, callback) => {
+      const result = await buyHotel(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('mortgage_property', async (data, callback) => {
+      const result = await mortgageProperty(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('unmortgage_property', async (data, callback) => {
+      const result = await unmortgageProperty(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('quit_game', async (data, callback) => {
+      const result = await quitGame(io, socket, data);
       if (callback) callback(result);
     });
     

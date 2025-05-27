@@ -125,6 +125,30 @@ Ces cartes ajoutent une dimension stratégique supplémentaire. Consultez [docs/
 
 À chaque tour de plateau complété, le joueur reçoit **200€**. S'il s'arrête exactement sur la case « Départ », le bonus est de **300€**.
 
+## Choix du plateau
+
+Deux préréglages de plateau sont disponibles :
+
+- `classic` : version française traditionnelle.
+- `english` : noms des rues en anglais.
+
+### Depuis l'interface
+
+Dans l'écran du lobby, l'hôte dispose d'un menu déroulant permettant de choisir
+le plateau avant de cliquer sur **Commencer la partie**.
+
+### Via l'API Socket
+
+Lorsque vous émettez l'événement `start_game`, précisez le nom du preset dans le
+champ `boardPreset` :
+
+```javascript
+socket.emit('start_game', { boardPreset: 'english' }, callback);
+```
+
+Si aucun preset n'est indiqué, c'est le plateau `classic` qui est utilisé par
+défaut.
+
 ## Guide d'utilisation avancée
 
 Consultez [docs/guide_utilisation.md](docs/guide_utilisation.md) pour un guide détaillé incluant des exemples de configuration, les règles du mode KCRAP et la procédure de sauvegarde/restauration.

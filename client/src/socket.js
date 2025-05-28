@@ -8,9 +8,12 @@ import {
   setAllianceState,
   setLeaderboard
 } from './state/ui';
+import { getPlayerState } from './state/player';
 
 // Gestionnaire de connexion au serveur
 let socket = null;
+const chatListeners = [];
+const tradeListeners = [];
 
 export function initSocket(url, onConnect) {
   // Lors du développement avec le client sur le port 8080, la connexion
@@ -58,6 +61,14 @@ export function initSocket(url, onConnect) {
   socket.on('host_changed', (data) => {
     console.log('Nouvel hôte:', data);
     // Mettre à jour l'interface
+  });
+
+  socket.on('chat_message', (msg) => {
+    chatListeners.forEach(l => l(msg));
+  });
+
+  socket.on('trade_proposal', (trade) => {
+    tradeListeners.forEach(l => l(trade));
   });
   
   // Événements du jeu
@@ -562,6 +573,34 @@ export function reconnectPlayer(lobbyId, token, previousSocketId) {
       } else {
         reject(new Error(response ? response.message : 'Erreur inconnue'));
       }
+    });
+  });
+}
+
+export function sendChatMessage(message) {
+  return new Promise((resolve, reject) => {
+    if (!socket) { reject(new Error('Socket non initialisé')); return; }
+    const { token } = getPlayerState();
+    socket.emit('chat_message', { token, message }, (res) => {
+      if (res && res.success) resolve(true); else reject(new Error(res ? res.message : 'Erreur inconnue'));
+    });
+  });
+}
+
+export function subscribeToChat(listener) {
+  chatListeners.push(listener);
+}
+
+export function subscribeToTrades(listener) {
+  tradeListeners.push(listener);
+}
+
+export function proposeTrade(toPlayerId, offer) {
+  return new Promise((resolve, reject) => {
+    if (!socket) { reject(new Error('Socket non initialisé')); return; }
+    const { token } = getPlayerState();
+    socket.emit('propose_trade', { token, toPlayerId, offer }, (res) => {
+      if (res && res.success) resolve(true); else reject(new Error(res ? res.message : 'Erreur inconnue'));
     });
   });
 }

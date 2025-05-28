@@ -19,7 +19,8 @@ import {
   reconnectPlayer,
   quitGame,
   startAuction,
-  setPlayerColor
+  setPlayerColor,
+  subscribeToTrades
 } from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
 import { getUIState, subscribeToUIState, setAuctionState } from './state/ui';
@@ -27,6 +28,8 @@ import { getPlayerState, setPlayerState, clearPlayerState } from './state/player
 import { getUsername, setUsername } from './state/username';
 import { renderProperty } from './components/Property.js';
 import { renderLeaderboard } from './components/Leaderboard.js';
+import { initChat } from './components/Chat.js';
+import { initPropertyManager } from './components/PropertyManager.js';
 
 // Initialiser la connexion socket
 async function handleSocketConnect() {
@@ -40,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Passer explicitement la fonction de rappel en second argument pour
   // éviter que la fonction soit utilisée comme URL de connexion.
   initSocket(undefined, handleSocketConnect);
+  subscribeToTrades(trade => {
+    alert(`Proposition d'échange reçue`);
+  });
 
   // Nettoyer l'état lorsqu'on quitte la page
   window.addEventListener('beforeunload', () => {
@@ -348,12 +354,14 @@ function showLobbyScreen(lobby) {
           <h3>Joueurs</h3>
           <ul id="lobby-players" class="players-list"></ul>
         </div>
+        <div id="chat" class="lobby-chat"></div>
       </div>
     </div>
   `;
   
   // Afficher la liste des joueurs
   renderLobbyPlayers(lobby.players);
+  initChat('chat', lobby.chats || []);
   
   // Gestionnaire pour démarrer la partie
   if (lobby.isHost) {
@@ -572,6 +580,8 @@ function showGameScreen(gameState) {
           <h3>Journal</h3>
           <div class="log-entries"></div>
         </div>
+        <div id="property-manager"></div>
+        <div id="chat" class="game-chat"></div>
       </div>
     </div>
   `;
@@ -580,6 +590,8 @@ function showGameScreen(gameState) {
   renderBoard(gameState.board, gameState.players, gameState.currentPlayer, 'property-info');
   renderPlayersInfo(gameState.players);
   updateGameLog(gameState.log);
+  initPropertyManager('property-manager');
+  initChat('chat', gameState.chats || []);
 
   // Ajouter les gestionnaires d'événements
   document.getElementById('roll-dice-btn').addEventListener('click', handleRollDice);

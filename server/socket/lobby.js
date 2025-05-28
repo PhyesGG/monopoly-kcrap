@@ -41,6 +41,8 @@ function createLobby(socket, { playerName, lobbyName, color = '#FF00A8' }) {
     }],
     auctionTimer: null,
     game: null,
+    chats: [],
+    tradeRequests: [],
     createdAt: Date.now()
   };
 
@@ -59,7 +61,8 @@ function createLobby(socket, { playerName, lobbyName, color = '#FF00A8' }) {
       name: lobbyName,
       players: lobbies[lobbyId].players,
       isHost: true,
-      token
+      token,
+      chats: lobbies[lobbyId].chats
     }
   };
 }
@@ -136,7 +139,8 @@ function joinLobby(socket, { playerName, lobbyId, color = '#FF00A8' }) {
       name: lobby.name,
       players: lobby.players,
       isHost: socket.id === lobby.host,
-      token
+      token,
+      chats: lobby.chats
     }
   };
 }
@@ -184,7 +188,8 @@ function reconnectPlayer(socket, { lobbyId, token, previousSocketId }) {
       players: lobby.players,
       isHost: socket.id === lobby.host,
       token: player.token,
-      gameState: lobby.game ? lobby.game.getGameState() : null
+      gameState: lobby.game ? lobby.game.getGameState() : null,
+      chats: lobby.chats
     }
   };
 }
@@ -263,6 +268,54 @@ function listLobbies() {
         host: lobby.players.find(p => p.id === lobby.host)?.name || 'Inconnu'
       }))
   };
+}
+
+function chatMessage(io, socket, { token, message }) {
+  const lobbyId = playerConnections[socket.id]?.lobbyId;
+  if (!lobbyId || !lobbies[lobbyId]) {
+    return { success: false, message: 'Lobby non trouvé' };
+  }
+  if (!validateToken(socket, token)) {
+    return { success: false, message: 'Token invalide' };
+  }
+  const lobby = lobbies[lobbyId];
+  const player = lobby.players.find(p => p.id === socket.id);
+  if (!player) return { success: false, message: 'Joueur non trouvé' };
+
+  const msg = { playerId: socket.id, name: player.name, message, timestamp: Date.now() };
+  lobby.chats.push(msg);
+  if (lobby.chats.length > 100) lobby.chats.shift();
+  io.of('/game').to(lobbyId).emit('chat_message', msg);
+  return { success: true };
+}
+
+function getChatHistory(socket, { lobbyId, token }) {
+  if (!lobbyId || !lobbies[lobbyId]) {
+    return { success: false, message: 'Lobby non trouvé' };
+  }
+  if (!validateToken(socket, token)) {
+    return { success: false, message: 'Token invalide' };
+  }
+  const lobby = lobbies[lobbyId];
+  return { success: true, chats: lobby.chats };
+}
+
+function proposeTrade(io, socket, { token, toPlayerId, offer }) {
+  const lobbyId = playerConnections[socket.id]?.lobbyId;
+  if (!lobbyId || !lobbies[lobbyId]) {
+    return { success: false, message: 'Lobby non trouvé' };
+  }
+  if (!validateToken(socket, token)) {
+    return { success: false, message: 'Token invalide' };
+  }
+  const lobby = lobbies[lobbyId];
+  const player = lobby.players.find(p => p.id === socket.id);
+  if (!player) return { success: false, message: 'Joueur non trouvé' };
+
+  const trade = { id: uuidv4(), from: socket.id, to: toPlayerId, offer };
+  lobby.tradeRequests.push(trade);
+  io.of('/game').to(toPlayerId).emit('trade_proposal', trade);
+  return { success: true };
 }
 
 function setPlayerColor(socket, { color }) {
@@ -356,6 +409,9 @@ module.exports = {
   lobbies,
   registerLoadedGames,
   validateToken,
-  setPlayerColor
+  setPlayerColor,
+  chatMessage,
+  getChatHistory,
+  proposeTrade
 };
 

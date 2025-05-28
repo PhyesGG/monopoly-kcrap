@@ -22,7 +22,7 @@ import {
   setPlayerColor
 } from './socket';
 import { getGameState, subscribeToGameState } from './state/game';
-import { getUIState, subscribeToUIState } from './state/ui';
+import { getUIState, subscribeToUIState, setAuctionState } from './state/ui';
 import { getPlayerState, setPlayerState, clearPlayerState } from './state/player';
 import { getUsername, setUsername } from './state/username';
 import { renderProperty } from './components/Property.js';
@@ -1132,6 +1132,8 @@ function updateGameControls(gameState) {
 async function handleRollDice() {
   try {
     console.log('Tentative de lancement des dés');
+    // Ferme l'overlay d'enchère terminée avant de continuer
+    setAuctionState(null);
     await rollDice();
     console.log('Dés lancés avec succès');
   } catch (error) {

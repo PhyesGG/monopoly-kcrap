@@ -64,6 +64,9 @@ Les tests Jest se trouvent dans le dossier `tests/` :
 npm test
 ```
 
+Un workflow GitHub Actions (`.github/workflows/ci.yml`) exécute les tests et
+construit l'image Docker à chaque push pour fiabiliser les mises en production.
+
 ## Déploiement avec Docker
 
 Une configuration Docker est disponible pour faciliter la mise en production.
@@ -77,6 +80,13 @@ Lancez le conteneur en précisant éventuellement les variables d'environnement�
 
 ```bash
 docker run -p 3000:3000 --env-file .env monopoly-kcrap
+```
+
+Des scripts pratiques sont fournis dans `scripts/` :
+
+```bash
+./scripts/build_image.sh      # construit l'image Docker
+./scripts/run_container.sh    # lance le conteneur
 ```
 
 ### Sauvegarde et reconnexion

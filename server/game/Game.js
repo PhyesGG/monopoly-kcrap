@@ -9,12 +9,12 @@ const CardDeck = require('./cards/CardDeck');
 const JAIL_FINE = 50;
 
 class Game {
-  constructor(boardPreset = 'classic') {
+  constructor(boardPreset = 'classic', options = {}) {
     this.id = uuid.v4();
     this.players = {};
     this.boardPreset = boardPreset;
-    this.board = new Board(boardPreset);
-    this.cardDeck = new CardDeck();
+    this.board = new Board(options.board || boardPreset);
+    this.cardDeck = new CardDeck(options.cards || []);
     this.currentPlayerIndex = 0;
     this.currentPlayer = null;
     this.state = 'waiting'; // waiting, rolling, auction, card, action, ended
@@ -82,8 +82,8 @@ class Game {
     return game;
   }
 
-  addPlayer(name, socketId, color = '#FF00A8') {
-    const player = new Player(name, socketId, color);
+  addPlayer(name, socketId, color = '#FF00A8', options = {}) {
+    const player = new Player(name, socketId, color, options);
     this.players[player.id] = player;
     
     this.log.push(`${name} a rejoint la partie`);
@@ -110,12 +110,14 @@ class Game {
   }
 
   startGame() {
-    if (Object.keys(this.players).length < 2) {
+    const activePlayers = Object.values(this.players).filter(p => !p.isSpectator);
+
+    if (activePlayers.length < 2) {
       return { success: false, message: "Il faut au moins 2 joueurs pour commencer la partie." };
     }
-    
+
     // Mélanger l'ordre des joueurs
-    const playerIds = Object.keys(this.players);
+    const playerIds = activePlayers.map(p => p.id);
     for (let i = playerIds.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [playerIds[i], playerIds[j]] = [playerIds[j], playerIds[i]];
@@ -695,6 +697,58 @@ class Game {
     return { success: true };
   }
 
+  tradePlayers(fromId, toId, {
+    fromProperties = [],
+    toProperties = [],
+    fromMoney = 0,
+    toMoney = 0
+  } = {}) {
+    const from = this.players[fromId];
+    const to = this.players[toId];
+
+    if (!from || !to) {
+      return { success: false, message: 'Joueur introuvable.' };
+    }
+
+    if (from.money < fromMoney || to.money < toMoney) {
+      return { success: false, message: 'Fonds insuffisants pour la transaction.' };
+    }
+
+    const getProps = (player, ids) => ids.map(id => player.properties.find(p => p.id === id)).filter(Boolean);
+
+    const propsFrom = getProps(from, fromProperties);
+    const propsTo = getProps(to, toProperties);
+
+    if (propsFrom.length !== fromProperties.length || propsTo.length !== toProperties.length) {
+      return { success: false, message: 'Propriété manquante pour la transaction.' };
+    }
+
+    propsFrom.forEach(p => {
+      from.properties = from.properties.filter(pr => pr.id !== p.id);
+      p.owner = to;
+      to.properties.push(p);
+    });
+
+    propsTo.forEach(p => {
+      to.properties = to.properties.filter(pr => pr.id !== p.id);
+      p.owner = from;
+      from.properties.push(p);
+    });
+
+    if (fromMoney > 0) {
+      from.money -= fromMoney;
+      to.money += fromMoney;
+    }
+
+    if (toMoney > 0) {
+      to.money -= toMoney;
+      from.money += toMoney;
+    }
+
+    this.log.push(`${from.name} échange avec ${to.name}`);
+    return { success: true };
+  }
+
   applyDigitalDisruption(turns) {
     this.digitalDisruptionTurnsLeft = turns;
     return true;
@@ -924,7 +978,9 @@ class Game {
         bankrupt: player.bankrupt,
         revengeToken: player.revengeToken,
         revengeActive: player.revengeActive,
-        currentAlliance: player.currentAlliance ? player.currentAlliance.player.id : null
+        currentAlliance: player.currentAlliance ? player.currentAlliance.player.id : null,
+        spectator: player.isSpectator,
+        ai: player.isAI
       })),
       currentPlayer: this.currentPlayer ? this.currentPlayer.id : null,
       state: this.state,

@@ -2,8 +2,12 @@ const Property = require('./Property');
 const presets = require('./boardPresets');
 
 class Board {
-  constructor(presetName = 'classic') {
-    this.preset = presets[presetName] || presets.classic;
+  constructor(preset = 'classic') {
+    if (typeof preset === 'object') {
+      this.preset = preset;
+    } else {
+      this.preset = presets[preset] || presets.classic;
+    }
     this.squares = this.initializeBoard();
   }
 

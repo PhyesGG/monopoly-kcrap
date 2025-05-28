@@ -837,9 +837,17 @@ function handleCardUI(card) {
     const form = gameControls.querySelector('.restructure-form');
     form.addEventListener('submit', e => {
       e.preventDefault();
+      const sourceId = parseInt(form.querySelector('[name="source-property"]').value, 10);
+      const targetId = parseInt(form.querySelector('[name="target-property"]').value, 10);
+
+      if (Number.isNaN(sourceId) || Number.isNaN(targetId)) {
+        alert('Veuillez sélectionner une propriété source et une propriété cible.');
+        return;
+      }
+
       const params = {
-        sourcePropertyId: parseInt(form.querySelector('[name="source-property"]').value, 10),
-        targetPropertyId: parseInt(form.querySelector('[name="target-property"]').value, 10)
+        sourcePropertyId: sourceId,
+        targetPropertyId: targetId
       };
       applyCardEffect(card.card.id, params);
     });

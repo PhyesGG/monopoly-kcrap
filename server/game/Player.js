@@ -1,11 +1,13 @@
 const uuid = require('uuid');
 
 class Player {
-  constructor(name, socketId, color = '#FF00A8') {
+  constructor(name, socketId, color = '#FF00A8', options = {}) {
     this.id = uuid.v4();
     this.name = name;
     this.socketId = socketId;
     this.color = color;
+    this.isSpectator = !!options.spectator;
+    this.isAI = !!options.ai;
     this.money = 1500; // Montant de départ
     this.position = 0; // Case de départ
     this.properties = [];

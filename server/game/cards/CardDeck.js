@@ -1,10 +1,11 @@
 const KcrapCard = require('./KcrapCard');
 
 class CardDeck {
-  constructor() {
+  constructor(customCards = []) {
     this.cards = [];
     this.currentIndex = 0;
-    
+    this.customCards = customCards;
+
     this.initialize();
   }
 
@@ -68,7 +69,13 @@ class CardDeck {
         'Allez directement en prison et ne passez pas par la case départ'
       ));
     }
-    
+
+    if (Array.isArray(this.customCards)) {
+      this.customCards.forEach(c => {
+        this.cards.push(new KcrapCard(c.id, c.type, c.title, c.description));
+      });
+    }
+
     // Mélanger les cartes
     this.shuffle();
   }

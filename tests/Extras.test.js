@@ -111,4 +111,48 @@ describe('Additional game mechanics', () => {
     game.nextPlayer();
     expect(game.digitalDisruptionTurnsLeft).toBe(0);
   });
+
+  test('direct trading of properties and money', () => {
+    const alice = game.addPlayer('Alice', 's1');
+    const bob = game.addPlayer('Bob', 's2');
+    const propA = game.board.getSquareAt(1);
+    const propB = game.board.getSquareAt(3);
+    propA.owner = alice; alice.properties.push(propA);
+    propB.owner = bob; bob.properties.push(propB);
+
+    const res = game.tradePlayers(alice.id, bob.id, {
+      fromProperties: [propA.id],
+      toProperties: [propB.id],
+      fromMoney: 100,
+      toMoney: 50
+    });
+    expect(res.success).toBe(true);
+    expect(propA.owner).toBe(bob);
+    expect(propB.owner).toBe(alice);
+    expect(alice.money).toBe(1500 - 100 + 50);
+    expect(bob.money).toBe(1500 + 100 - 50);
+  });
+
+  test('custom board and cards are accepted', () => {
+    const customBoard = { 1: 'Custom Street' };
+    const customCards = [ { id: 'bonus_1', type: 'bonus', title: 'Bonus', description: 'Gain 100' } ];
+    const g = new Game('classic', { board: customBoard, cards: customCards });
+    expect(g.board.getSquareAt(1).name).toBe('Custom Street');
+    const cardIds = g.cardDeck.cards.map(c => c.id);
+    expect(cardIds).toContain('bonus_1');
+  });
+
+  test('spectator players are ignored when starting', () => {
+    const g = new Game();
+    const a = g.addPlayer('Alice', 's1');
+    const b = g.addPlayer('Bob', 's2');
+    const spec = g.addPlayer('Spec', 's3', '#FF0000', { spectator: true });
+    const ai = g.addPlayer('AI', 's4', '#00FF00', { ai: true });
+    jest.spyOn(global.Math, 'random').mockReturnValue(0);
+    const res = g.startGame();
+    Math.random.mockRestore();
+    expect(res.success).toBe(true);
+    expect(g.playerOrder.length).toBe(3); // Alice, Bob, AI
+    expect(g.players[spec.id].isSpectator).toBe(true);
+  });
 });

@@ -1,4 +1,4 @@
-const { createLobby, joinLobby, leaveLobby, listLobbies, reconnectPlayer, handleDisconnect, setPlayerColor } = require('./lobby');
+const { createLobby, joinLobby, leaveLobby, listLobbies, reconnectPlayer, handleDisconnect, setPlayerColor, chatMessage, getChatHistory, proposeTrade } = require('./lobby');
 const Logger = require('../utils/logger');
 const logger = new Logger('socket');
 const { 
@@ -73,6 +73,21 @@ function initSocketHandlers(io) {
 
     socket.on('set_color', (data, callback) => {
       const result = setPlayerColor(socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('chat_message', (data, callback) => {
+      const result = chatMessage(io, socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('get_chat_history', (data, callback) => {
+      const result = getChatHistory(socket, data);
+      if (callback) callback(result);
+    });
+
+    socket.on('propose_trade', (data, callback) => {
+      const result = proposeTrade(io, socket, data);
       if (callback) callback(result);
     });
     

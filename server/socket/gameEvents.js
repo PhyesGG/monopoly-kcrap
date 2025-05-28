@@ -40,7 +40,7 @@ function checkAuth(socket, token) {
 }
 
 async function startGame(io, socket, data = {}) {
-  const auth = checkAuth(socket, data.token);
+  const auth = checkAuth(socket, data?.token);
   if (auth) return auth;
 
   const lobby = getLobbyBySocketId(socket.id);
@@ -103,7 +103,7 @@ async function startGame(io, socket, data = {}) {
 }
 
 async function rollDice(io, socket, data = {}) {
-  const auth = checkAuth(socket, data.token);
+  const auth = checkAuth(socket, data?.token);
   if (auth) return auth;
 
   const lobby = getLobbyBySocketId(socket.id);
@@ -140,7 +140,7 @@ async function rollDice(io, socket, data = {}) {
 }
 
 async function startAuctionEvent(io, socket, data = {}) {
-  const auth = checkAuth(socket, data.token);
+  const auth = checkAuth(socket, data?.token);
   if (auth) return auth;
 
   const lobby = getLobbyBySocketId(socket.id);
@@ -179,6 +179,7 @@ async function startAuctionEvent(io, socket, data = {}) {
 }
 
 async function placeBid(io, socket, data = {}) {
+  data = data || {};
   const { amount, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -239,7 +240,7 @@ async function placeBid(io, socket, data = {}) {
 }
 
 async function passBid(io, socket, data = {}) {
-  const auth = checkAuth(socket, data.token);
+  const auth = checkAuth(socket, data?.token);
   if (auth) return auth;
 
   const lobby = getLobbyBySocketId(socket.id);
@@ -314,7 +315,7 @@ async function passBid(io, socket, data = {}) {
 }
 
 async function activateRevenge(io, socket, data = {}) {
-  const auth = checkAuth(socket, data.token);
+  const auth = checkAuth(socket, data?.token);
   if (auth) return auth;
 
   const lobby = getLobbyBySocketId(socket.id);
@@ -365,7 +366,7 @@ async function activateRevenge(io, socket, data = {}) {
 }
 
 async function declineRevenge(io, socket, data = {}) {
-  const auth = checkAuth(socket, data.token);
+  const auth = checkAuth(socket, data?.token);
   if (auth) return auth;
 
   const lobby = getLobbyBySocketId(socket.id);
@@ -416,6 +417,7 @@ async function declineRevenge(io, socket, data = {}) {
 }
 
 async function createAlliance(io, socket, data = {}) {
+  data = data || {};
   const { targetPlayerId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -464,6 +466,7 @@ async function createAlliance(io, socket, data = {}) {
 }
 
 async function breakAlliance(io, socket, data = {}) {
+  data = data || {};
   const { unilateral = true, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -512,6 +515,7 @@ async function breakAlliance(io, socket, data = {}) {
 }
 
 async function applyCardEffect(io, socket, data = {}) {
+  data = data || {};
   const { cardId, params, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -568,6 +572,7 @@ async function applyCardEffect(io, socket, data = {}) {
 }
 
 async function buyHouse(io, socket, data = {}) {
+  data = data || {};
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -608,6 +613,7 @@ async function buyHouse(io, socket, data = {}) {
 }
 
 async function buyHotel(io, socket, data = {}) {
+  data = data || {};
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -648,6 +654,7 @@ async function buyHotel(io, socket, data = {}) {
 }
 
 async function mortgageProperty(io, socket, data = {}) {
+  data = data || {};
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -688,6 +695,7 @@ async function mortgageProperty(io, socket, data = {}) {
 }
 
 async function unmortgageProperty(io, socket, data = {}) {
+  data = data || {};
   const { propertyId, token } = data;
   const auth = checkAuth(socket, token);
   if (auth) return auth;
@@ -728,7 +736,7 @@ async function unmortgageProperty(io, socket, data = {}) {
 }
 
 async function quitGame(io, socket, data = {}) {
-  const auth = checkAuth(socket, data.token);
+  const auth = checkAuth(socket, data?.token);
   if (auth) return auth;
 
   const lobby = getLobbyBySocketId(socket.id);

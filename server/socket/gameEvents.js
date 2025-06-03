@@ -175,7 +175,12 @@ async function startAuctionEvent(io, socket, data = {}) {
 
   await saveGame(game, lobby);
 
-  return { success: true };
+  return {
+    success: true,
+    property: auction.property,
+    startingBid: auction.startingBid,
+    gameState: game.getGameState()
+  };
 }
 
 async function placeBid(io, socket, data = {}) {

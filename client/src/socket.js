@@ -533,8 +533,14 @@ export function startAuction() {
       return;
     }
 
-    socket.emit('start_auction', {}, (response) => {
+    const { token } = getPlayerState() || {};
+
+    socket.emit('start_auction', { token }, (response) => {
       if (response && response.success) {
+        if (response.property) {
+          setAuctionState({ started: true, property: response.property, startingBid: response.startingBid, amount: response.startingBid });
+          updateGameState(response.gameState);
+        }
         resolve(response);
       } else {
         reject(new Error(response ? response.message : 'Erreur inconnue'));
